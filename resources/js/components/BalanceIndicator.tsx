@@ -1,0 +1,75 @@
+interface BalanceStats {
+    balance: number;
+    totalDebt: number;
+    currentMonthDebt: number;
+}
+
+interface BalanceIndicatorProps {
+    stats?: BalanceStats;
+}
+
+export default function BalanceIndicator({ stats }: BalanceIndicatorProps) {
+    // Datos ficticios por defecto
+    const defaultStats: BalanceStats = {
+        balance: 15420.50,
+        totalDebt: 4500.00,
+        currentMonthDebt: 1850.00,
+    };
+
+    const data = stats || defaultStats;
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Balance */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/40 rounded-lg shadow-lg p-6 border border-green-200 dark:border-green-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
+                            Balance Disponible
+                        </p>
+                        <p className="text-3xl font-bold text-green-900 dark:text-green-200">
+                            ${data.balance.toFixed(2)}
+                        </p>
+                    </div>
+                    <div className="text-4xl text-green-200 dark:text-green-800">
+                        💰
+                    </div>
+                </div>
+            </div>
+
+            {/* Total Debt */}
+            <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/40 rounded-lg shadow-lg p-6 border border-red-200 dark:border-red-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
+                            Deuda Total
+                        </p>
+                        <p className="text-3xl font-bold text-red-900 dark:text-red-200">
+                            ${data.totalDebt.toFixed(2)}
+                        </p>
+                    </div>
+                    <div className="text-4xl text-red-200 dark:text-red-800">
+                        💳
+                    </div>
+                </div>
+            </div>
+
+            {/* Current Month Debt */}
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-900/40 rounded-lg shadow-lg p-6 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+                            Deuda Mes Actual
+                        </p>
+                        <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">
+                            ${data.currentMonthDebt.toFixed(2)}
+                        </p>
+                    </div>
+                    <div className="text-4xl text-amber-200 dark:text-amber-800">
+                        📅
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

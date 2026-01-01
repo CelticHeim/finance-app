@@ -1,9 +1,22 @@
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { createIncome } from '@/api/incomes.api';
+
+interface IncomeFormData {
+    amount: number;
+    category: string;
+    description?: string;
+    entry_date: string;
+}
 
 export default function IncomeForm() {
-    const [amount, setAmount] = useState('');
-    const [description, setDescription] = useState('');
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const { register, handleSubmit, reset, watch } = useForm<IncomeFormData>({
+        defaultValues: {
+            amount: 0,
+            category: 'sueldo',
+            description: '',
+            entry_date: new Date().toISOString().split('T')[0],
+        },
+    });
 
     const incomeCategories = [
         { value: 'sueldo', label: 'Sueldo', color: '#10B981' },
@@ -12,26 +25,20 @@ export default function IncomeForm() {
         { value: 'otros', label: 'Otros', color: '#6EE7B7' },
     ];
 
-    const [category, setCategory] = useState('sueldo');
+    const selectedCategory = watch('category');
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log({
-            type: 'income',
-            amount,
-            description,
-            category,
-            date,
+    const onSubmit = async (data: IncomeFormData) => {
+        await createIncome(data);
+        reset({
+            amount: 0,
+            category: 'sueldo',
+            description: '',
+            entry_date: new Date().toISOString().split('T')[0],
         });
-        // Reset form
-        setAmount('');
-        setDescription('');
-        setDate(new Date().toISOString().split('T')[0]);
-        setCategory('sueldo');
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Amount */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -40,11 +47,9 @@ export default function IncomeForm() {
                 <input
                     type="number"
                     step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-                    required
+                    {...register('amount')}
                 />
             </div>
 
@@ -55,11 +60,9 @@ export default function IncomeForm() {
                 </label>
                 <input
                     type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
                     placeholder="Ej: Sueldo quincenal"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-                    required
+                    {...register('description')}
                 />
             </div>
 
@@ -73,9 +76,13 @@ export default function IncomeForm() {
                         <button
                             key={cat.value}
                             type="button"
-                            onClick={() => setCategory(cat.value)}
+                            onClick={() => {
+                                register('category').onChange({
+                                    target: { value: cat.value },
+                                });
+                            }}
                             className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                                category === cat.value
+                                selectedCategory === cat.value
                                     ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-offset-gray-800'
                                     : 'opacity-70 hover:opacity-100'
                             }`}
@@ -88,6 +95,7 @@ export default function IncomeForm() {
                         </button>
                     ))}
                 </div>
+                <input type="hidden" {...register('category')} />
             </div>
 
             {/* Date */}
@@ -97,10 +105,8 @@ export default function IncomeForm() {
                 </label>
                 <input
                     type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-                    required
+                    {...register('entry_date')}
                 />
             </div>
 

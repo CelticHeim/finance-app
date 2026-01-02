@@ -12,7 +12,11 @@ interface ExpenseFormData {
     due_day?: number;
 }
 
-export default function ExpenseForm() {
+interface ExpenseFormProps {
+    onSubmitSuccess?: () => void;
+}
+
+export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
     const { register, handleSubmit, reset, watch } = useForm<ExpenseFormData>({
         defaultValues: {
             amount: 0,
@@ -48,6 +52,8 @@ export default function ExpenseForm() {
             total_installments: 3,
             due_day: 10,
         });
+        // Ejecutar callback después de éxito
+        onSubmitSuccess?.();
     };
 
     return (

@@ -4,7 +4,11 @@ import ExpenseForm from './forms/ExpenseForm';
 
 type FormType = 'income' | 'expense';
 
-export default function RegistroForm() {
+interface RegistroFormProps {
+    onDataUpdated?: () => void;
+}
+
+export default function RegistroForm({ onDataUpdated }: RegistroFormProps) {
     const [formType, setFormType] = useState<FormType>('expense');
 
     return (
@@ -38,8 +42,8 @@ export default function RegistroForm() {
             </div>
 
             {/* Render appropriate form */}
-            {formType === 'income' && <IncomeForm />}
-            {formType === 'expense' && <ExpenseForm />}
+            {formType === 'income' && <IncomeForm onSubmitSuccess={onDataUpdated} />}
+            {formType === 'expense' && <ExpenseForm onSubmitSuccess={onDataUpdated} />}
         </div>
     );
 }

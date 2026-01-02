@@ -11,11 +11,20 @@ interface DayEvent {
     isFixed?: boolean;
 }
 
-export default function Calendar() {
+interface CalendarProps {
+    onMonthYearChange?: (month: number, year: number) => void;
+}
+
+export default function Calendar({ onMonthYearChange }: CalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [events, setEvents] = useState<DayEvent[]>([]);
     const [loading, setLoading] = useState(false);
+
+    // Notificar cambios de mes/año
+    useEffect(() => {
+        onMonthYearChange?.(currentMonth + 1, currentYear);
+    }, [currentMonth, currentYear, onMonthYearChange]);
 
     // Cargar eventos del API
     useEffect(() => {

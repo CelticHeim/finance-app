@@ -12,5 +12,6 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 Route::get('/finances', [FinanceController::class, 'index']);
+Route::get('/finances/summary', [FinanceController::class, 'getSummary']);
 Route::apiResource('incomes', IncomeController::class);
 Route::apiResource('expenses', ExpenseController::class);

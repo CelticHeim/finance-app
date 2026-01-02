@@ -43,3 +43,29 @@ export const getFinances = async (
         console.error(error);
     }
 };
+
+type SummaryResponse = {
+    message: string;
+    data: {
+        available_balance: number;
+        total_debt: number;
+        current_month_debt: number;
+    };
+};
+
+export const getSummary = async (
+    month?: number,
+    year?: number
+): Promise<SummaryResponse | undefined> => {
+    try {
+        const { data } = await api.get('/finances/summary', {
+            params: {
+                ...(month && { month }),
+                ...(year && { year }),
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+};

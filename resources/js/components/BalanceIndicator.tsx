@@ -1,22 +1,36 @@
-interface BalanceStats {
-    balance: number;
-    totalDebt: number;
-    currentMonthDebt: number;
-}
+import { useState, useEffect } from 'react';
+import { getSummary } from '../api/finances.api';
 
 interface BalanceIndicatorProps {
-    stats?: BalanceStats;
+    month?: number;
+    year?: number;
+    onDataUpdated?: () => void;
 }
 
-export default function BalanceIndicator({ stats }: BalanceIndicatorProps) {
-    // Datos ficticios por defecto
-    const defaultStats: BalanceStats = {
-        balance: 15420.50,
-        totalDebt: 4500.00,
-        currentMonthDebt: 1850.00,
-    };
+export default function BalanceIndicator({ month, year, onDataUpdated }: BalanceIndicatorProps) {
+    const [data, setData] = useState<any>({
+        available_balance: 0,
+        total_debt: 0,
+        current_month_debt: 0,
+    });
+    const [loading, setLoading] = useState(true);
 
-    const data = stats || defaultStats;
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const response = await getSummary(month, year);
+                if (response?.data) {
+                    setData(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching summary:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSummary();
+    }, [month, year, onDataUpdated]);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -28,7 +42,7 @@ export default function BalanceIndicator({ stats }: BalanceIndicatorProps) {
                             Balance Disponible
                         </p>
                         <p className="text-3xl font-bold text-green-900 dark:text-green-200">
-                            ${data.balance.toFixed(2)}
+                            ${data?.available_balance}
                         </p>
                     </div>
                     <div className="text-4xl text-green-200 dark:text-green-800">
@@ -45,7 +59,7 @@ export default function BalanceIndicator({ stats }: BalanceIndicatorProps) {
                             Deuda Total
                         </p>
                         <p className="text-3xl font-bold text-red-900 dark:text-red-200">
-                            ${data.totalDebt.toFixed(2)}
+                            ${data?.total_debt}
                         </p>
                     </div>
                     <div className="text-4xl text-red-200 dark:text-red-800">
@@ -62,7 +76,7 @@ export default function BalanceIndicator({ stats }: BalanceIndicatorProps) {
                             Deuda Mes Actual
                         </p>
                         <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">
-                            ${data.currentMonthDebt.toFixed(2)}
+                            ${data?.current_month_debt}
                         </p>
                     </div>
                     <div className="text-4xl text-amber-200 dark:text-amber-800">

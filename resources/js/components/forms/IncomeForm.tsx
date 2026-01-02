@@ -8,7 +8,11 @@ interface IncomeFormData {
     entry_date: string;
 }
 
-export default function IncomeForm() {
+interface IncomeFormProps {
+    onSubmitSuccess?: () => void;
+}
+
+export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
     const { register, handleSubmit, reset, watch } = useForm<IncomeFormData>({
         defaultValues: {
             amount: 0,
@@ -35,6 +39,8 @@ export default function IncomeForm() {
             description: '',
             entry_date: new Date().toISOString().split('T')[0],
         });
+        // Ejecutar callback después de éxito
+        onSubmitSuccess?.();
     };
 
     return (

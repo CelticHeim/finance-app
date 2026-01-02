@@ -21,7 +21,7 @@ class FinanceController extends Controller {
                 'amount',
                 'category',
                 'description',
-                'entry_date as transaction_date',   
+                'entry_date as transaction_date',
                 DB::raw("'income' as type"),
                 'created_at'
             )
@@ -43,7 +43,7 @@ class FinanceController extends Controller {
         if ($month && $year) {
             $incomeQuery->whereYear('entry_date', $year)
                 ->whereMonth('entry_date', $month);
-            
+
             $expenseQuery->whereYear('expense_date', $year)
                 ->whereMonth('expense_date', $month);
         }
@@ -63,6 +63,40 @@ class FinanceController extends Controller {
                 'last_page' => $transactions->lastPage(),
                 'from' => $transactions->firstItem(),
                 'to' => $transactions->lastItem(),
+            ],
+        ]);
+    }
+
+    public function getSummary(Request $request) {
+        $month = $request->query('month', now()->month);
+        $year = $request->query('year', now()->year);
+
+        // Total de ingresos
+        $totalIncome = DB::table('incomes')
+            ->whereNull('deleted_at')
+            ->sum('amount');
+
+        // Total de gastos (deuda total)
+        $totalExpenses = DB::table('expenses')
+            ->whereNull('deleted_at')
+            ->sum('amount');
+
+        // Balance disponible (ingresos - gastos)
+        $availableBalance = $totalIncome - $totalExpenses;
+
+        // Deuda del mes actual
+        $currentMonthDebt = DB::table('expenses')
+            ->whereNull('deleted_at')
+            ->whereYear('expense_date', $year)
+            ->whereMonth('expense_date', $month)
+            ->sum('amount');
+
+        return response()->json([
+            'message' => 'Resumen financiero',
+            'data' => [
+                'available_balance' => $availableBalance,
+                'total_debt' => $totalExpenses,
+                'current_month_debt' => $currentMonthDebt,
             ],
         ]);
     }

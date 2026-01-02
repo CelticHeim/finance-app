@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import RegistroForm from '../components/RegistroForm';
 import Calendar from '../components/calendar/Calendar';
 import BalanceIndicator from '../components/BalanceIndicator';
@@ -11,46 +11,65 @@ export default function Home() {
     const [movements, setMovements] = useState<any[]>([]);
     const [debts, setDebts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const refreshKey = useRef(0);
+    const [, setRefreshTrigger] = useState(0);
+    const [updateTrigger, setUpdateTrigger] = useState(0);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getFinances(1);
-                if (response?.data) {
-                    // Mapear los datos de la API al formato que espera MovementsTable
-                    const mappedMovements = response.data.map(record => ({
+    // Función para refrescar los datos
+    const refetchData = async () => {
+        try {
+            const response = await getFinances(1);
+            if (response?.data) {
+                // Mapear los datos de la API al formato que espera MovementsTable
+                const mappedMovements = response.data.map(record => ({
+                    id: String(record.id),
+                    description: record.description || record.category,
+                    amount: parseFloat(record.amount),
+                    type: record.type,
+                    category: record.category,
+                    categoryColor: record.type === 'income' ? '#10B981' : '#EF4444',
+                    date: record.transaction_date,
+                }));
+                setMovements(mappedMovements);
+
+                // Filtrar solo las deudas (installments) para DebtTable
+                const mappedDebts = response.data
+                    .filter(record => record.type === 'expense')
+                    .map(record => ({
                         id: String(record.id),
                         description: record.description || record.category,
                         amount: parseFloat(record.amount),
-                        type: record.type,
+                        dueDate: record.transaction_date,
+                        status: 'pending' as const,
                         category: record.category,
-                        categoryColor: record.type === 'income' ? '#10B981' : '#EF4444',
-                        date: record.transaction_date,
+                        categoryColor: '#EF4444',
                     }));
-                    setMovements(mappedMovements);
-
-                    // Filtrar solo las deudas (installments) para DebtTable
-                    const mappedDebts = response.data
-                        .filter(record => record.type === 'expense') // O aplicar otra lógica según tus installments
-                        .map(record => ({
-                            id: String(record.id),
-                            description: record.description || record.category,
-                            amount: parseFloat(record.amount),
-                            dueDate: record.transaction_date,
-                            status: 'pending' as const,
-                            category: record.category,
-                            categoryColor: '#EF4444',
-                        }));
-                    setDebts(mappedDebts);
-                }
-            } catch (error) {
-                console.error('Error fetching finances:', error);
-            } finally {
-                setLoading(false);
+                setDebts(mappedDebts);
             }
-        };
+        } catch (error) {
+            console.error('Error fetching finances:', error);
+        }
+    };
 
-        fetchData();
+    // Función para actualizar mes y año cuando el calendario cambia
+    const handleMonthYearChange = (month: number, year: number) => {
+        setCurrentMonth(month);
+        setCurrentYear(year);
+    };
+    const notifyDataUpdated = () => {
+        // Trigger para que Calendar se refresque
+        refreshKey.current += 1;
+        setRefreshTrigger(prev => prev + 1);
+        // Refrescar tablas
+        refetchData();
+        // Trigger para que BalanceIndicator se refresque
+        setUpdateTrigger(prev => prev + 1);
+    };
+
+    useEffect(() => {
+        refetchData().then(() => setLoading(false));
     }, []);
 
     return (
@@ -61,19 +80,26 @@ export default function Home() {
                 </h1>
 
                 {/* Balance Stats */}
-                <BalanceIndicator />
+                <BalanceIndicator 
+                    month={currentMonth} 
+                    year={currentYear}
+                    onDataUpdated={() => setUpdateTrigger(prev => prev + 1)}
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
                     {/* Left side - Registro Form */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
-                            <RegistroForm />
+                            <RegistroForm onDataUpdated={notifyDataUpdated} />
                         </div>
                     </div>
 
                     {/* Right side - Calendar */}
                     <div className="lg:col-span-4">
-                        <Calendar />
+                        <Calendar 
+                            key={refreshKey.current} 
+                            onMonthYearChange={handleMonthYearChange}
+                        />
                     </div>
                 </div>
 

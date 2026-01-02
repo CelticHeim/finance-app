@@ -84,6 +84,13 @@ class FinanceController extends Controller {
         // Balance disponible (ingresos - gastos)
         $availableBalance = $totalIncome - $totalExpenses;
 
+        // Ingresos del mes actual
+        $currentMonthIncome = DB::table('incomes')
+            ->whereNull('deleted_at')
+            ->whereYear('entry_date', $year)
+            ->whereMonth('entry_date', $month)
+            ->sum('amount');
+
         // Deuda del mes actual
         $currentMonthDebt = DB::table('expenses')
             ->whereNull('deleted_at')
@@ -96,6 +103,7 @@ class FinanceController extends Controller {
             'data' => [
                 'available_balance' => $availableBalance,
                 'total_debt' => $totalExpenses,
+                'current_month_income' => $currentMonthIncome,
                 'current_month_debt' => $currentMonthDebt,
             ],
         ]);

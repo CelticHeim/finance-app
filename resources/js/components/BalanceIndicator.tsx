@@ -11,6 +11,7 @@ export default function BalanceIndicator({ month, year, onDataUpdated }: Balance
     const [data, setData] = useState<any>({
         available_balance: 0,
         total_debt: 0,
+        current_month_income: 0,
         current_month_debt: 0,
     });
     const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ export default function BalanceIndicator({ month, year, onDataUpdated }: Balance
     }, [month, year, onDataUpdated]);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {/* Balance */}
             <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/40 rounded-lg shadow-lg p-6 border border-green-200 dark:border-green-800">
                 <div className="flex items-center justify-between">
@@ -64,6 +65,23 @@ export default function BalanceIndicator({ month, year, onDataUpdated }: Balance
                     </div>
                     <div className="text-4xl text-red-200 dark:text-red-800">
                         💳
+                    </div>
+                </div>
+            </div>
+
+            {/* Current Month Income */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/40 rounded-lg shadow-lg p-6 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
+                            Ingresos Mes Actual
+                        </p>
+                        <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
+                            ${data?.current_month_income}
+                        </p>
+                    </div>
+                    <div className="text-4xl text-blue-200 dark:text-blue-800">
+                        📈
                     </div>
                 </div>
             </div>

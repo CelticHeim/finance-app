@@ -49,6 +49,7 @@ type SummaryResponse = {
     data: {
         available_balance: number;
         total_debt: number;
+        current_month_income: number;
         current_month_debt: number;
     };
 };

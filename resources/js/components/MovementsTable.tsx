@@ -217,7 +217,7 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
             )}
 
             {/* Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                     <p className="text-sm font-medium text-green-700 dark:text-green-400">
                         Total Ingresos
@@ -255,7 +255,7 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
                         ).toFixed(2)}
                     </p>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 }

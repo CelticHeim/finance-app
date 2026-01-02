@@ -34,7 +34,7 @@ export default function Calendar({ onMonthYearChange }: CalendarProps) {
                 const response = await getFinances(1, 100, currentMonth + 1, currentYear);
                 if (response?.data) {
                     const mappedEvents = response.data.map(record => ({
-                        id: String(record.id),
+                        id: `${record.type}-${record.id}`,
                         title: record.description || record.category,
                         amount: parseFloat(record.amount),
                         color: record.type === 'income' ? '#10B981' : '#EF4444',

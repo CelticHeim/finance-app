@@ -24,7 +24,7 @@ export default function Home() {
             if (response?.data) {
                 // Mapear los datos de la API al formato que espera MovementsTable
                 const mappedMovements = response.data.map(record => ({
-                    id: String(record.id),
+                    id: `${record.type}-${record.id}`,
                     description: record.description || record.category,
                     amount: parseFloat(record.amount),
                     type: record.type,
@@ -38,7 +38,7 @@ export default function Home() {
                 const mappedDebts = response.data
                     .filter(record => record.type === 'expense')
                     .map(record => ({
-                        id: String(record.id),
+                        id: `${record.type}-${record.id}`,
                         description: record.description || record.category,
                         amount: parseFloat(record.amount),
                         dueDate: record.transaction_date,

@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import CalendarGrid from './CalendarGrid';
+import { getFinances } from '../../api/finances.api';
 
 interface DayEvent {
     id: string;
@@ -10,80 +11,39 @@ interface DayEvent {
     isFixed?: boolean;
 }
 
-// Datos ficticios
-const MOCK_EVENTS = [
-    {
-        id: '1',
-        date: '2025-12-01',
-        title: 'Sueldo',
-        amount: 5000,
-        color: '#10B981',
-        type: 'income' as const,
-    },
-    {
-        id: '2',
-        date: '2025-12-03',
-        title: 'Compra SuperM',
-        amount: 470,
-        color: '#F59E0B',
-        type: 'expense' as const,
-    },
-    {
-        id: '3',
-        date: '2025-12-05',
-        title: 'Netflix',
-        amount: 199,
-        color: '#8B5CF6',
-        type: 'expense' as const,
-        isFixed: true,
-    },
-    {
-        id: '4',
-        date: '2025-12-10',
-        title: 'Cuota Moto (1/3)',
-        amount: 1500,
-        color: '#EF4444',
-        type: 'expense' as const,
-    },
-    {
-        id: '5',
-        date: '2025-12-15',
-        title: 'Electricidad',
-        amount: 800,
-        color: '#3B82F6',
-        type: 'expense' as const,
-        isFixed: true,
-    },
-    {
-        id: '6',
-        date: '2025-12-20',
-        title: 'Bonus',
-        amount: 1000,
-        color: '#10B981',
-        type: 'income' as const,
-    },
-    {
-        id: '7',
-        date: '2025-12-25',
-        title: 'Regalo',
-        amount: 300,
-        color: '#F59E0B',
-        type: 'expense' as const,
-    },
-    {
-        id: '8',
-        date: '2025-12-28',
-        title: 'Gasolina',
-        amount: 600,
-        color: '#F59E0B',
-        type: 'expense' as const,
-        isFixed: true,
-    },
-];
-
 export default function Calendar() {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [events, setEvents] = useState<DayEvent[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // Cargar eventos del API
+    useEffect(() => {
+        const fetchEvents = async () => {
+            setLoading(true);
+            try {
+                const response = await getFinances(1, 100, currentMonth + 1, currentYear);
+                if (response?.data) {
+                    const mappedEvents = response.data.map(record => ({
+                        id: String(record.id),
+                        title: record.description || record.category,
+                        amount: parseFloat(record.amount),
+                        color: record.type === 'income' ? '#10B981' : '#EF4444',
+                        type: record.type,
+                        isFixed: false,
+                        date: record.transaction_date,
+                    }));
+                    setEvents(mappedEvents);
+                }
+            } catch (error) {
+                console.error('Error fetching calendar events:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvents();
+    }, [currentMonth, currentYear]);
 
     const monthName = new Date(currentYear, currentMonth, 1).toLocaleString('es-ES', {
         month: 'long',
@@ -93,28 +53,15 @@ export default function Calendar() {
     // Convertir eventos a Map para búsqueda rápida
     const eventsMap = useMemo(() => {
         const map = new Map<string, DayEvent[]>();
-        MOCK_EVENTS.forEach((event) => {
-            const [year, month, day] = event.date.split('-');
-            const currentMonthNum = currentMonth;
-            const currentYearNum = currentYear;
-
-            if (parseInt(year) === currentYearNum && parseInt(month) === currentMonthNum + 1) {
-                const dateKey = event.date;
-                if (!map.has(dateKey)) {
-                    map.set(dateKey, []);
-                }
-                map.get(dateKey)!.push({
-                    id: event.id,
-                    title: event.title,
-                    amount: event.amount,
-                    color: event.color,
-                    type: event.type,
-                    isFixed: event.isFixed,
-                });
+        events.forEach((event) => {
+            const dateKey = event.date;
+            if (!map.has(dateKey)) {
+                map.set(dateKey, []);
             }
+            map.get(dateKey)!.push(event);
         });
         return map;
-    }, [currentMonth, currentYear]);
+    }, [events]);
 
     const handlePrevMonth = () => {
         if (currentMonth === 0) {

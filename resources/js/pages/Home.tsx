@@ -1,18 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RegistroForm from '../components/RegistroForm';
 import Calendar from '../components/calendar/Calendar';
 import BalanceIndicator from '../components/BalanceIndicator';
 import DebtTable from '../components/DebtTable';
 import MovementsTable from '../components/MovementsTable';
+import { getFinances } from '../api/finances.api';
 
 export default function Home() {
     const [tableView, setTableView] = useState<'debts' | 'movements'>('debts');
+    const [movements, setMovements] = useState<any[]>([]);
+    const [debts, setDebts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getFinances(1);
+                if (response?.data) {
+                    // Mapear los datos de la API al formato que espera MovementsTable
+                    const mappedMovements = response.data.map(record => ({
+                        id: String(record.id),
+                        description: record.description || record.category,
+                        amount: parseFloat(record.amount),
+                        type: record.type,
+                        category: record.category,
+                        categoryColor: record.type === 'income' ? '#10B981' : '#EF4444',
+                        date: record.transaction_date,
+                    }));
+                    setMovements(mappedMovements);
+
+                    // Filtrar solo las deudas (installments) para DebtTable
+                    const mappedDebts = response.data
+                        .filter(record => record.type === 'expense') // O aplicar otra lógica según tus installments
+                        .map(record => ({
+                            id: String(record.id),
+                            description: record.description || record.category,
+                            amount: parseFloat(record.amount),
+                            dueDate: record.transaction_date,
+                            status: 'pending' as const,
+                            category: record.category,
+                            categoryColor: '#EF4444',
+                        }));
+                    setDebts(mappedDebts);
+                }
+            } catch (error) {
+                console.error('Error fetching finances:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
             <div className="w-full">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
-                    Mi Finanzas
+                    Mis Finanzas
                 </h1>
 
                 {/* Balance Stats */}
@@ -57,8 +102,8 @@ export default function Home() {
                 </div>
 
                 {/* Tables */}
-                {tableView === 'movements' && <MovementsTable />}
-                {tableView === 'debts' && <DebtTable />}
+                {tableView === 'movements' && <MovementsTable movements={movements} />}
+                {tableView === 'debts' && <DebtTable debts={debts} />}
             </div>
         </div>
     );

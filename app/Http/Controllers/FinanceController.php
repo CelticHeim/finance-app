@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
+use App\Models\Fixed;
 use App\Models\Income;
+use App\Models\Installment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -105,6 +107,19 @@ class FinanceController extends Controller {
                 'total_debt' => $totalExpenses,
                 'current_month_income' => $currentMonthIncome,
                 'current_month_debt' => $currentMonthDebt,
+            ],
+        ]);
+    }
+
+    public function getDebts() {
+        $fixeds = Fixed::all();
+        $installments = Installment::where('status', 'pending')->get();
+
+        return response()->json([
+            'message' => 'Lista de deudas (gastos fijos y cuotas)',
+            'data' => [
+                'fixeds' => $fixeds,
+                'installments' => $installments,
             ],
         ]);
     }

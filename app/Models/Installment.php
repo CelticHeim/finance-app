@@ -10,26 +10,21 @@ class Installment extends Model {
     use SoftDeletes;
 
     protected $fillable = [
-        'expense_id',
-        'total_installments',
-        'current_installment',
         'due_date',
+        'amount',
+        'number_of_installments',
+        'current_installment',
+        'status',
     ];
 
     protected $casts = [
         'due_date' => 'date',
-        'total_installments' => 'integer',
+        'amount' => 'decimal:2',
+        'number_of_installments' => 'integer',
         'current_installment' => 'integer',
     ];
 
     protected $dates = [
         'due_date',
     ];
-
-    /**
-     * Get the expense that owns this installment.
-     */
-    public function expense(): BelongsTo {
-        return $this->belongsTo(Expense::class);
-    }
 }

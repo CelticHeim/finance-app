@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expenses', function (Blueprint $table) {
+        Schema::create('fixeds', function (Blueprint $table) {
             $table->id();
             $table->decimal('amount', 10, 2);
-            $table->decimal('discount', 10, 2)->default(0);
             $table->string('category');
             $table->text('description')->nullable();
-            $table->date('expense_date');
-            $table->unsignedBigInteger('installment_id')->nullable();
+            $table->unsignedTinyInteger('day_of_month');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('expenses');
+        Schema::dropIfExists('fixeds');
     }
 };

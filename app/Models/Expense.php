@@ -11,6 +11,7 @@ class Expense extends Model {
 
     protected $fillable = [
         'amount',
+        'discount',
         'category',
         'description',
         'expense_date',

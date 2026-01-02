@@ -44,7 +44,7 @@ export default function CalendarDay({ day, isCurrentMonth, isToday, events, onCl
             >
                 {day}
             </div>
-            <div className="space-y-1 text-xs max-h-40 overflow-y-auto">
+            <div className="space-y-1 text-xs min-h-30">
                 {events.map((event) => (
                     <CalendarEvent
                         key={event.id}

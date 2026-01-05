@@ -114,7 +114,7 @@ class FinanceController extends Controller {
     public function getDebts() {
         $fixeds = Fixed::all();
         $installments = Installment::where('status', 'pending')->get();
-
+        
         return response()->json([
             'message' => 'Lista de deudas (gastos fijos y cuotas)',
             'data' => [

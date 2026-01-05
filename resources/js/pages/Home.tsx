@@ -4,12 +4,16 @@ import Calendar from '../components/calendar/Calendar';
 import BalanceIndicator from '../components/BalanceIndicator';
 import DebtTable from '../components/DebtTable';
 import MovementsTable from '../components/MovementsTable';
-import { getFinances } from '../api/finances.api';
+import InstallmentTable from '../components/InstallmentTable';
+import FixedTable from '../components/FixedTable';
+import { getFinances, getDebts } from '../api/finances.api';
 
 export default function Home() {
-    const [tableView, setTableView] = useState<'debts' | 'movements'>('debts');
+    const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('debts');
     const [movements, setMovements] = useState<any[]>([]);
     const [debts, setDebts] = useState<any[]>([]);
+    const [installments, setInstallments] = useState<any[]>([]);
+    const [fixeds, setFixeds] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -20,10 +24,14 @@ export default function Home() {
     // Función para refrescar los datos
     const refetchData = async () => {
         try {
-            const response = await getFinances(1);
-            if (response?.data) {
-                // Mapear los datos de la API al formato que espera MovementsTable
-                const mappedMovements = response.data.map(record => ({
+            const [financeResponse, debtsResponse] = await Promise.all([
+                getFinances(1),
+                getDebts(),
+            ]);
+
+            // Procesar datos de movimientos
+            if (financeResponse?.data) {
+                const mappedMovements = financeResponse.data.map(record => ({
                     id: `${record.type}-${record.id}`,
                     description: record.description || record.category,
                     amount: parseFloat(record.amount),
@@ -34,8 +42,7 @@ export default function Home() {
                 }));
                 setMovements(mappedMovements);
 
-                // Filtrar solo las deudas (installments) para DebtTable
-                const mappedDebts = response.data
+                const mappedDebts = financeResponse.data
                     .filter(record => record.type === 'expense')
                     .map(record => ({
                         id: `${record.type}-${record.id}`,
@@ -47,6 +54,28 @@ export default function Home() {
                         categoryColor: '#EF4444',
                     }));
                 setDebts(mappedDebts);
+            }
+
+            // Procesar datos de deudas (fixeds e installments)
+            if (debtsResponse?.data) {
+                const mappedFixeds = debtsResponse.data.fixeds.map(fixed => ({
+                    id: `fixed-${fixed.id}`,
+                    amount: parseFloat(fixed.amount),
+                    category: fixed.category,
+                    description: fixed.description,
+                    day_of_month: fixed.day_of_month,
+                }));
+                setFixeds(mappedFixeds);
+
+                const mappedInstallments = debtsResponse.data.installments.map(inst => ({
+                    id: `installment-${inst.id}`,
+                    amount: parseFloat(inst.amount),
+                    number_of_installments: inst.number_of_installments,
+                    current_installment: inst.current_installment,
+                    due_date: inst.due_date,
+                    status: inst.status,
+                }));
+                setInstallments(mappedInstallments);
             }
         } catch (error) {
             console.error('Error fetching finances:', error);
@@ -113,7 +142,7 @@ export default function Home() {
                                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                     >
-                        💳 Deudas
+                        💳 Gastos
                     </button>
                     <button
                         onClick={() => setTableView('movements')}
@@ -125,11 +154,33 @@ export default function Home() {
                     >
                         📊 Movimientos
                     </button>
+                    <button
+                        onClick={() => setTableView('fixeds')}
+                        className={`px-6 py-2 rounded-md font-medium transition-all ${
+                            tableView === 'fixeds'
+                                ? 'bg-blue-500 text-white'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        📅 Gastos Fijos
+                    </button>
+                    <button
+                        onClick={() => setTableView('installments')}
+                        className={`px-6 py-2 rounded-md font-medium transition-all ${
+                            tableView === 'installments'
+                                ? 'bg-blue-500 text-white'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        📈 A Plazos
+                    </button>
                 </div>
 
                 {/* Tables */}
                 {tableView === 'movements' && <MovementsTable movements={movements} />}
                 {tableView === 'debts' && <DebtTable debts={debts} />}
+                {tableView === 'fixeds' && <FixedTable fixeds={fixeds} />}
+                {tableView === 'installments' && <InstallmentTable installments={installments} />}
             </div>
         </div>
     );

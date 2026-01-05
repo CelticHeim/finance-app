@@ -70,3 +70,43 @@ export const getSummary = async (
         console.error(error);
     }
 };
+
+type DebtsResponse = {
+    message: string;
+    data: {
+        fixeds: Array<{
+            id: number;
+            amount: string;
+            category: string;
+            description: string | null;
+            day_of_month: number;
+            created_at: string;
+        }>;
+        installments: Array<{
+            id: number;
+            amount: string;
+            number_of_installments: number;
+            current_installment: number;
+            due_date: string;
+            status: 'pending' | 'paid' | 'overdue';
+            created_at: string;
+        }>;
+    };
+};
+
+export const getDebts = async (
+    month?: number,
+    year?: number
+): Promise<DebtsResponse | undefined> => {
+    try {
+        const { data } = await api.get('/finances/debts', {
+            params: {
+                ...(month && { month }),
+                ...(year && { year }),
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+};

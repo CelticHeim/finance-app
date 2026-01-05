@@ -1,15 +1,16 @@
 import { useForm } from 'react-hook-form';
 import { createExpense } from '@/api/expenses.api';
+import { createFixed } from '@/api/fixed.api';
+import { createInstallment } from '@/api/installment.api';
 
 interface ExpenseFormData {
     amount: number;
     category: string;
     description?: string;
     expense_date: string;
-    is_fixed?: boolean;
-    is_installment?: boolean;
+    expenseType: 'normal' | 'fixed' | 'installment';
     total_installments?: number;
-    due_day?: number;
+    day_of_month?: number;
 }
 
 interface ExpenseFormProps {
@@ -23,10 +24,9 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             category: 'comida',
             description: '',
             expense_date: new Date().toISOString().split('T')[0],
-            is_fixed: false,
-            is_installment: false,
+            expenseType: 'normal',
             total_installments: 3,
-            due_day: 10,
+            day_of_month: 10,
         },
     });
 
@@ -38,22 +38,43 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
     ];
 
     const selectedCategory = watch('category');
-    const isInstallment = watch('is_installment');
+    const expenseType = watch('expenseType');
 
     const onSubmit = async (data: ExpenseFormData) => {
-        await createExpense(data);
-        reset({
-            amount: 0,
-            category: 'comida',
-            description: '',
-            expense_date: new Date().toISOString().split('T')[0],
-            is_fixed: false,
-            is_installment: false,
-            total_installments: 3,
-            due_day: 10,
-        });
-        // Ejecutar callback después de éxito
-        onSubmitSuccess?.();
+        try {
+            if (data.expenseType === 'fixed' && data.day_of_month) {
+                // Crear gasto fijo
+                await createFixed({
+                    amount: data.amount,
+                    category: data.category,
+                    description: data.description,
+                    day_of_month: data.day_of_month,
+                });
+            } else if (data.expenseType === 'installment' && data.total_installments && data.day_of_month) {
+                // Crear gasto a plazos
+                await createInstallment({
+                    amount: data.amount,
+                    number_of_installments: parseInt(String(data.total_installments)),
+                    due_date: data.expense_date,
+                });
+            } else if (data.expenseType === 'normal') {
+                // Crear gasto normal
+                await createExpense(data);
+            }
+
+            reset({
+                amount: 0,
+                category: 'comida',
+                description: '',
+                expense_date: new Date().toISOString().split('T')[0],
+                expenseType: 'normal',
+                total_installments: 3,
+                day_of_month: 10,
+            });
+            onSubmitSuccess?.();
+        } catch (error) {
+            console.error('Error submitting expense:', error);
+        }
     };
 
     return (
@@ -129,34 +150,74 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 />
             </div>
 
-            {/* Fixed expense checkbox */}
-            <div className="flex items-center gap-3">
-                <input
-                    type="checkbox"
-                    id="isFixed"
-                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600"
-                    {...register('is_fixed')}
-                />
-                <label htmlFor="isFixed" className="text-sm text-gray-700 dark:text-gray-300">
-                    Este es un gasto fijo (se repite cada mes)
+            {/* Expense type selector - Radio buttons */}
+            <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Tipo de gasto
                 </label>
+
+                {/* Normal expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeNormal"
+                        value="normal"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeNormal" className="text-sm text-gray-700 dark:text-gray-300">
+                        Gasto normal
+                    </label>
+                </div>
+
+                {/* Fixed expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeFixed"
+                        value="fixed"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeFixed" className="text-sm text-gray-700 dark:text-gray-300">
+                        Gasto fijo (se repite cada mes)
+                    </label>
+                </div>
+
+                {/* Installment expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeInstallment"
+                        value="installment"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeInstallment" className="text-sm text-gray-700 dark:text-gray-300">
+                        Pago a cuotas (MSI)
+                    </label>
+                </div>
             </div>
 
-            {/* Installment checkbox */}
-            <div className="flex items-center gap-3">
-                <input
-                    type="checkbox"
-                    id="isInstallment"
-                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600"
-                    {...register('is_installment')}
-                />
-                <label htmlFor="isInstallment" className="text-sm text-gray-700 dark:text-gray-300">
-                    Este es un pago a cuotas (MSI)
-                </label>
-            </div>
+            {/* Day of month - for fixed and installment expenses */}
+            {(expenseType === 'fixed' || expenseType === 'installment') && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Día del mes de pago
+                    </label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="31"
+                        placeholder="10"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                        {...register('day_of_month')}
+                    />
+                </div>
+            )}
 
-            {/* Installments count */}
-            {isInstallment && (
+            {/* Installments count - only for installment expenses */}
+            {expenseType === 'installment' && (
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Número de cuotas
@@ -170,23 +231,6 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                         <option value="6">6 cuotas</option>
                         <option value="12">12 cuotas</option>
                     </select>
-                </div>
-            )}
-
-            {/* Installment due day */}
-            {isInstallment && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Día de vencimiento
-                    </label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="31"
-                        placeholder="10"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                        {...register('due_day')}
-                    />
                 </div>
             )}
 

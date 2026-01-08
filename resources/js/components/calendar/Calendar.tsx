@@ -13,9 +13,11 @@ interface DayEvent {
 
 interface CalendarProps {
     onMonthYearChange?: (month: number, year: number) => void;
+    installments?: any[];
+    fixeds?: any[];
 }
 
-export default function Calendar({ onMonthYearChange }: CalendarProps) {
+export default function Calendar({ onMonthYearChange, installments = [], fixeds = [] }: CalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [events, setEvents] = useState<DayEvent[]>([]);
@@ -32,8 +34,11 @@ export default function Calendar({ onMonthYearChange }: CalendarProps) {
             setLoading(true);
             try {
                 const response = await getFinances(1, 100, currentMonth + 1, currentYear);
-                if (response?.data) {
-                    const mappedEvents = response.data.map(record => ({
+                let allEvents: DayEvent[] = [];
+
+                // Procesar eventos de ingresos y gastos
+                if (response?.data.data) {
+                    const mappedEvents = response.data.data.map(record => ({
                         id: `${record.type}-${record.id}`,
                         title: record.description || record.category,
                         amount: parseFloat(record.amount),
@@ -42,8 +47,38 @@ export default function Calendar({ onMonthYearChange }: CalendarProps) {
                         isFixed: false,
                         date: record.transaction_date,
                     }));
-                    setEvents(mappedEvents);
+                    allEvents = [...mappedEvents];
                 }
+
+                // Procesar eventos de pagos fijos
+                if (fixeds.length > 0) {
+                    const fixedEvents = fixeds.map(fixed => ({
+                        id: `fixed-${fixed.id}`,
+                        title: fixed.description || fixed.category,
+                        amount: fixed.amount,
+                        color: '#F59E0B', // Amber para pagos fijos
+                        type: 'expense' as const,
+                        isFixed: true,
+                        date: `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(fixed.day_of_month).padStart(2, '0')}`,
+                    }));
+                    allEvents = [...allEvents, ...fixedEvents];
+                }
+
+                // Procesar eventos de cuotas/plazos
+                if (installments.length > 0) {
+                    const installmentEvents = installments.map(installment => ({
+                        id: `installment-${installment.id}`,
+                        title: `Cuota ${installment.current_installment}/${installment.number_of_installments}`,
+                        amount: installment.amount,
+                        color: '#8B5CF6', // Purple para cuotas
+                        type: 'expense' as const,
+                        isFixed: false,
+                        date: installment.due_date,
+                    }));
+                    allEvents = [...allEvents, ...installmentEvents];
+                }
+
+                setEvents(allEvents);
             } catch (error) {
                 console.error('Error fetching calendar events:', error);
             } finally {
@@ -52,7 +87,7 @@ export default function Calendar({ onMonthYearChange }: CalendarProps) {
         };
 
         fetchEvents();
-    }, [currentMonth, currentYear]);
+    }, [currentMonth, currentYear, fixeds, installments]);
 
     const monthName = new Date(currentYear, currentMonth, 1).toLocaleString('es-ES', {
         month: 'long',

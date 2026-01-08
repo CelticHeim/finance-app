@@ -15,15 +15,12 @@ class Expense extends Model {
         'category',
         'description',
         'expense_date',
-        'is_fixed',
-        'is_installment',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'discount' => 'decimal:2',
         'expense_date' => 'date',
-        'is_fixed' => 'boolean',
-        'is_installment' => 'boolean',
     ];
 
     protected $dates = [

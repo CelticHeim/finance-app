@@ -10,18 +10,31 @@ type FinanceRecord = {
     created_at: string;
 };
 
-type FinanceResponse = {
+type PaginatedResponse<T> = {
     message: string;
-    data: FinanceRecord[];
-    pagination: {
-        total: number;
-        per_page: number;
+    data: {
         current_page: number;
-        last_page: number;
+        data: T[];
+        first_page_url: string;
         from: number;
+        last_page: number;
+        last_page_url: string;
+        links: Array<{
+            url: string | null;
+            label: string;
+            page: number | null;
+            active: boolean;
+        }>;
+        next_page_url: string | null;
+        path: string;
+        per_page: number;
+        prev_page_url: string | null;
         to: number;
+        total: number;
     };
 };
+
+type FinanceResponse = PaginatedResponse<FinanceRecord>;
 
 export const getFinances = async (
     page: number = 1,

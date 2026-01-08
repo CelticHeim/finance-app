@@ -16,10 +16,30 @@ interface MovementsTableProps {
 }
 
 export default function MovementsTable({ movements }: MovementsTableProps) {
+    // Get current month's first and last day
+    const getCurrentMonthRange = () => {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        
+        const formatDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        return {
+            from: formatDate(firstDay),
+            to: formatDate(lastDay)
+        };
+    };
+
+    const monthRange = getCurrentMonthRange();
     const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
     const [filterCategory, setFilterCategory] = useState<string>('all');
-    const [filterDateFrom, setFilterDateFrom] = useState('');
-    const [filterDateTo, setFilterDateTo] = useState('');
+    const [filterDateFrom, setFilterDateFrom] = useState(monthRange.from);
+    const [filterDateTo, setFilterDateTo] = useState(monthRange.to);
 
     const dataToShow = movements || [];
     // Obtener categorías únicas
@@ -42,85 +62,86 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
 
             {/* Filters */}
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                {/* <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
                     Filtros
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Type Filter */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                            Tipo
-                        </label>
-                        <select
-                            value={filterType}
-                            onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">Todos</option>
-                            <option value="income">Ingresos</option>
-                            <option value="expense">Gastos</option>
-                        </select>
-                    </div>
-
-                    {/* Category Filter */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                            Categoría
-                        </label>
-                        <select
-                            value={filterCategory}
-                            onChange={(e) => setFilterCategory(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">Todas</option>
-                            {categories.map((cat) => (
-                                <option key={cat} value={cat}>
-                                    {cat}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Date From Filter */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                            Desde
-                        </label>
-                        <input
-                            type="date"
-                            value={filterDateFrom}
-                            onChange={(e) => setFilterDateFrom(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Date To Filter */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                            Hasta
-                        </label>
-                        <input
-                            type="date"
-                            value={filterDateTo}
-                            onChange={(e) => setFilterDateTo(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                </div>
-
-                {/* Reset Filters Button */}
-                <div className="mt-4">
+                </h3> */}
+                <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+                    {/* Reset Filters Button */}
                     <button
                         onClick={() => {
                             setFilterType('all');
                             setFilterCategory('all');
-                            setFilterDateFrom('');
-                            setFilterDateTo('');
+                            setFilterDateFrom(monthRange.from);
+                            setFilterDateTo(monthRange.to);
                         }}
-                        className="text-sm px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                        className="text-sm px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors whitespace-nowrap"
                     >
                         Limpiar Filtros
                     </button>
+
+                    {/* Filters Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+                        {/* Type Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                Tipo
+                            </label>
+                            <select
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="all">Todos</option>
+                                <option value="income">Ingresos</option>
+                                <option value="expense">Gastos</option>
+                            </select>
+                        </div>
+
+                        {/* Category Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                Categoría
+                            </label>
+                            <select
+                                value={filterCategory}
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="all">Todas</option>
+                                {categories.map((cat) => (
+                                    <option key={cat} value={cat}>
+                                        {cat}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Date From Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                Desde
+                            </label>
+                            <input
+                                type="date"
+                                value={filterDateFrom}
+                                onChange={(e) => setFilterDateFrom(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        {/* Date To Filter */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                Hasta
+                            </label>
+                            <input
+                                type="date"
+                                value={filterDateTo}
+                                onChange={(e) => setFilterDateTo(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 

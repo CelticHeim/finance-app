@@ -52,20 +52,21 @@ class FinanceController extends Controller {
 
         $transactions = $incomeQuery
             ->union($expenseQuery)
-            ->orderByDesc('created_at')
+            ->orderByDesc('transaction_date')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'message' => 'Lista de ingresos y gastos paginada',
-            'data' => $transactions->items(),
-            'pagination' => [
-                'total' => $transactions->total(),
-                'per_page' => $transactions->perPage(),
-                'current_page' => $transactions->currentPage(),
-                'last_page' => $transactions->lastPage(),
-                'from' => $transactions->firstItem(),
-                'to' => $transactions->lastItem(),
-            ],
+            'data' => $transactions,
+            // 'data' => $transactions->items(),
+            // 'pagination' => [
+            //     'total' => $transactions->total(),
+            //     'per_page' => $transactions->perPage(),
+            //     'current_page' => $transactions->currentPage(),
+            //     'last_page' => $transactions->lastPage(),
+            //     'from' => $transactions->firstItem(),
+            //     'to' => $transactions->lastItem(),
+            // ],
         ]);
     }
 

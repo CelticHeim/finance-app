@@ -9,7 +9,7 @@ import FixedTable from '../components/FixedTable';
 import { getFinances, getDebts } from '../api/finances.api';
 
 export default function Home() {
-    const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('debts');
+    const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
     const [movements, setMovements] = useState<any[]>([]);
     const [debts, setDebts] = useState<any[]>([]);
     const [installments, setInstallments] = useState<any[]>([]);
@@ -30,8 +30,8 @@ export default function Home() {
             ]);
 
             // Procesar datos de movimientos
-            if (financeResponse?.data) {
-                const mappedMovements = financeResponse.data.map(record => ({
+            if (financeResponse?.data.data) {
+                const mappedMovements = financeResponse.data.data.map(record => ({
                     id: `${record.type}-${record.id}`,
                     description: record.description || record.category,
                     amount: parseFloat(record.amount),
@@ -42,7 +42,7 @@ export default function Home() {
                 }));
                 setMovements(mappedMovements);
 
-                const mappedDebts = financeResponse.data
+                const mappedDebts = financeResponse.data.data
                     .filter(record => record.type === 'expense')
                     .map(record => ({
                         id: `${record.type}-${record.id}`,
@@ -128,13 +128,15 @@ export default function Home() {
                         <Calendar 
                             key={refreshKey.current} 
                             onMonthYearChange={handleMonthYearChange}
+                            installments={installments}
+                            fixeds={fixeds}
                         />
                     </div>
                 </div>
 
                 {/* Table View Switch */}
                 <div className="flex gap-2 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-1 w-fit">
-                    <button
+                    {/* <button
                         onClick={() => setTableView('debts')}
                         className={`px-6 py-2 rounded-md font-medium transition-all ${
                             tableView === 'debts'
@@ -143,7 +145,7 @@ export default function Home() {
                         }`}
                     >
                         💳 Gastos
-                    </button>
+                    </button> */}
                     <button
                         onClick={() => setTableView('movements')}
                         className={`px-6 py-2 rounded-md font-medium transition-all ${
@@ -155,16 +157,6 @@ export default function Home() {
                         📊 Movimientos
                     </button>
                     <button
-                        onClick={() => setTableView('fixeds')}
-                        className={`px-6 py-2 rounded-md font-medium transition-all ${
-                            tableView === 'fixeds'
-                                ? 'bg-blue-500 text-white'
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                        📅 Gastos Fijos
-                    </button>
-                    <button
                         onClick={() => setTableView('installments')}
                         className={`px-6 py-2 rounded-md font-medium transition-all ${
                             tableView === 'installments'
@@ -174,11 +166,21 @@ export default function Home() {
                     >
                         📈 A Plazos
                     </button>
+                    <button
+                        onClick={() => setTableView('fixeds')}
+                        className={`px-6 py-2 rounded-md font-medium transition-all ${
+                            tableView === 'fixeds'
+                                ? 'bg-blue-500 text-white'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                    >
+                        📅 Gastos Fijos
+                    </button>
                 </div>
 
                 {/* Tables */}
                 {tableView === 'movements' && <MovementsTable movements={movements} />}
-                {tableView === 'debts' && <DebtTable debts={debts} />}
+                {/* {tableView === 'debts' && <DebtTable debts={debts} />} */}
                 {tableView === 'fixeds' && <FixedTable fixeds={fixeds} />}
                 {tableView === 'installments' && <InstallmentTable installments={installments} />}
             </div>

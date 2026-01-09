@@ -10,21 +10,28 @@ class Installment extends Model {
     use SoftDeletes;
 
     protected $fillable = [
-        'due_date',
         'amount',
+        'description',
+        'category',
+        'due_date',
         'number_of_installments',
         'current_installment',
+        'first_payment_date',
+        'last_payment_date',
         'status',
     ];
 
     protected $casts = [
-        'due_date' => 'date',
         'amount' => 'decimal:2',
         'number_of_installments' => 'integer',
         'current_installment' => 'integer',
+        'due_date' => 'date',
+        'first_payment_date' => 'date',
+        'last_payment_date' => 'date',
     ];
 
-    protected $dates = [
-        'due_date',
-    ];
+    // Relations
+    public function transactions() {
+        return $this->morphMany(Transaction::class, 'transactionable');
+    }
 }

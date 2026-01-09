@@ -18,31 +18,31 @@ class FixedSeeder extends Seeder
                 'amount' => 1200.00,
                 'category' => 'Alquiler',
                 'description' => 'Alquiler apartamento',
-                'day_of_month' => 1,
+                'due_date' => '2026-02-01',
             ],
             [
                 'amount' => 100.00,
                 'category' => 'Internet',
                 'description' => 'Servicio de internet',
-                'day_of_month' => 5,
+                'due_date' => '2026-02-05',
             ],
             [
                 'amount' => 80.00,
                 'category' => 'Teléfono',
                 'description' => 'Plan de celular',
-                'day_of_month' => 10,
+                'due_date' => '2026-02-10',
             ],
             [
                 'amount' => 50.00,
                 'category' => 'Suscripción',
                 'description' => 'Streaming mensual',
-                'day_of_month' => 15,
+                'due_date' => '2026-02-15',
             ],
             [
                 'amount' => 150.00,
                 'category' => 'Seguro',
                 'description' => 'Seguro del coche',
-                'day_of_month' => 20,
+                'due_date' => '2026-02-20',
             ],
         ];
 

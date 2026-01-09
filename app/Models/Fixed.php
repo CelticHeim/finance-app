@@ -12,10 +12,16 @@ class Fixed extends Model {
         'amount',
         'category',
         'description',
-        'day_of_month',
+        'due_date',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'due_date' => 'date',
     ];
+
+    // Relations
+    public function transactions() {
+        return $this->morphMany(Transaction::class, 'transactionable');
+    }
 }

@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('fixeds', function (Blueprint $table) {
             $table->id();
             $table->decimal('amount', 10, 2);
+            $table->text('description');
             $table->string('category');
-            $table->text('description')->nullable();
-            $table->unsignedTinyInteger('day_of_month');
+            $table->date('due_date');
             $table->timestamps();
             $table->softDeletes();
         });

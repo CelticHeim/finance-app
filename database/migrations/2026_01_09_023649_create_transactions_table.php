@@ -9,17 +9,16 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('installments', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->decimal('amount', 10, 2);
             $table->text('description');
+            $table->decimal('discount', 10, 2)->default(0);
+            $table->dateTime('transaction_date')->nullable();
             $table->string('category');
-            $table->date('due_date');
-            $table->tinyInteger('number_of_installments');
-            $table->tinyInteger('current_installment')->default(1);
-            $table->date('first_payment_date');
-            $table->date('last_payment_date');
-            $table->string('status')->default('pending'); // pending, paid, overdue
+            $table->string('type'); // 'income', 'expense', 'fixed', 'installment'\
+            $table->string('status')->default('pending'); // 'pending', 'completed', 'failed'
+            $table->morphs('transactionable'); // Create transactionable_id and transactionable_type columns
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +28,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('installments');
+        Schema::dropIfExists('transactions');
     }
 };

@@ -1,11 +1,5 @@
 import api from "@/lib/axios";
-
-type CreateFixedData = {
-    amount: number;
-    category: string;
-    description?: string;
-    day_of_month: number;
-};
+import type { CreateFixedData } from "@/types/fixeds.type";
 
 export const createFixed = async (data: CreateFixedData) => {
     try {

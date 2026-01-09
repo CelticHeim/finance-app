@@ -1,15 +1,7 @@
 import api from "@/lib/axios";
+import type { CreateExpenseData } from "@/types/expenses.type";
 
-export const createExpense = async (expenseData: {
-    amount: number;
-    category: string;
-    description?: string;
-    expense_date: string;
-    is_fixed?: boolean;
-    is_installment?: boolean;
-    total_installments?: number;
-    due_day?: number;
-}) => {
+export const createExpense = async (expenseData: CreateExpenseData) => {
     try {
         const { data } = await api.post('/expenses', expenseData);
         return data;

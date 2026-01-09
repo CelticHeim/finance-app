@@ -1,11 +1,7 @@
 import api from "@/lib/axios";
+import type { CreateIncomeData } from "@/types/incomes.type";
 
-export const createIncome = async (incomeData: {
-    amount: number;
-    category: string;
-    description?: string;
-    entry_date: string;
-}) => {
+export const createIncome = async (incomeData: CreateIncomeData) => {
     try {
         const { data } = await api.post('/incomes', incomeData);
         return data;

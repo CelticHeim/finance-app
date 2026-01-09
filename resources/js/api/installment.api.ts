@@ -1,10 +1,5 @@
 import api from "@/lib/axios";
-
-type CreateInstallmentData = {
-    amount: number;
-    number_of_installments: number;
-    due_date: string;
-};
+import type { CreateInstallmentData } from "@/types/installments.type";
 
 export const createInstallment = async (data: CreateInstallmentData) => {
     try {

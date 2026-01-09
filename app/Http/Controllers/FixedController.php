@@ -11,7 +11,7 @@ class FixedController extends Controller {
             'amount' => 'required|numeric|min:0.01',
             'category' => 'required|string',
             'description' => 'nullable|string',
-            'day_of_month' => 'required|integer|min:1|max:31',
+            'due_date' => 'required|integer|min:1|max:31',
         ]);
 
         $fixed = Fixed::create($validated);

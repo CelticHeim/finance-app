@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ExpenseSeeder::class,
             FixedSeeder::class,
             InstallmentSeeder::class,
+            TransactionSeeder::class,
         ]);
     }
 }

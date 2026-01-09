@@ -27,4 +27,17 @@ class Transaction extends Model {
     public function transactionable() {
         return $this->morphTo();
     }
+
+    // Scopes
+    public function scopeByMonthAndYear($query, $month = null, $year = null) {
+        if ($month) {
+            $query->whereMonth('transaction_date', $month);
+        }
+
+        if ($year) {
+            $query->whereYear('transaction_date', $year);
+        }
+
+        return $query;
+    }
 }

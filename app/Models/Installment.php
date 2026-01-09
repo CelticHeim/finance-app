@@ -16,8 +16,8 @@ class Installment extends Model {
         'due_date',
         'number_of_installments',
         'current_installment',
-        'first_payment_date',
-        'last_payment_date',
+        // 'first_payment_date',
+        // 'last_payment_date',
         'status',
     ];
 
@@ -26,8 +26,8 @@ class Installment extends Model {
         'number_of_installments' => 'integer',
         'current_installment' => 'integer',
         'due_date' => 'date',
-        'first_payment_date' => 'date',
-        'last_payment_date' => 'date',
+        // 'first_payment_date' => 'date',
+        // 'last_payment_date' => 'date',
     ];
 
     // Relations

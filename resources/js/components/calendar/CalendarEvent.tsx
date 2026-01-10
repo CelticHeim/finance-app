@@ -2,11 +2,10 @@ interface CalendarEventProps {
     title: string;
     amount: number;
     color: string;
-    type: 'income' | 'expense';
-    isFixed?: boolean;
+    type: 'income' | 'expense' | 'fixed' | 'installment';
 }
 
-export default function CalendarEvent({ title, amount, color, type, isFixed }: CalendarEventProps) {
+export default function CalendarEvent({ title, amount, color, type }: CalendarEventProps) {
     return (
         <div
             className="px-2 py-1 rounded text-xs font-semibold text-white truncate relative group cursor-pointer"

@@ -1,13 +1,14 @@
 import { TransactionRecord } from '@/types/transactions.type';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { getFinances } from '../api/finances.api';
 import MultiSelect from './ui/MultiSelect';
 
 interface MovementsTableProps {
-    movements?: TransactionRecord[];
-    onTypesChange?: (types: string[]) => void;
+    refreshTrigger?: number;
 }
 
-export default function MovementsTable({ movements, onTypesChange }: MovementsTableProps) {
+export default function MovementsTable({ refreshTrigger = 0 }: MovementsTableProps) {
+    const [movements, setMovements] = useState<TransactionRecord[]>([]);
     // Mapeo de tipos a nombres en español
     const typeLabels: Record<string, string> = {
         'income': 'Ingresos',
@@ -42,26 +43,24 @@ export default function MovementsTable({ movements, onTypesChange }: MovementsTa
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterDateFrom, setFilterDateFrom] = useState(monthRange.from);
     const [filterDateTo, setFilterDateTo] = useState(monthRange.to);
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-    // Debounce para cambios de tipos y hacer petición a la API
+    // Cargar datos de la API cuando cambien los tipos seleccionados o cuando se reciba un refresh trigger
     useEffect(() => {
-        if (debounceTimer.current) {
-            clearTimeout(debounceTimer.current);
-        }
-
-        debounceTimer.current = setTimeout(() => {
-            if (onTypesChange) {
-                onTypesChange(selectedTypes);
-            }
-        }, 500); // 500ms de debounce
-
-        return () => {
-            if (debounceTimer.current) {
-                clearTimeout(debounceTimer.current);
+        const fetchMovements = async () => {
+            try {
+                const typesString = selectedTypes.length > 0 ? selectedTypes.join(',') : 'income,expense';
+                const response = await getFinances(1, 100, { types: typesString });
+                
+                if (response?.data.data) {
+                    setMovements(response.data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching movements:', error);
             }
         };
-    }, [selectedTypes, onTypesChange]);
+
+        fetchMovements();
+    }, [selectedTypes, refreshTrigger]);
 
     // Filter data based on filters
     const filteredData = (movements || []).filter((movement) => {

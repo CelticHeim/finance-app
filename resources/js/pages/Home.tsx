@@ -1,40 +1,25 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import RegistroForm from '../components/RegistroForm';
 import Calendar from '../components/calendar/Calendar';
 import BalanceIndicator from '../components/BalanceIndicator';
 import MovementsTable from '../components/MovementsTable';
 import InstallmentTable from '../components/InstallmentTable';
 import FixedTable from '../components/FixedTable';
-import { getFinances, getDebts } from '../api/finances.api';
-import type { TransactionRecord } from '../types/transactions.type';
+import { getDebts } from '../api/finances.api';
 import type { InstallmentRecord } from '../types/installments.type';
 import type { FixedRecord } from '../types/fixeds.type';
 
 export default function Home() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
     
-    const [movements, setMovements] = useState<TransactionRecord[]>([]);
     const [installments, setInstallments] = useState<InstallmentRecord[]>([]);
     const [fixeds, setFixeds] = useState<FixedRecord[]>([]);
-    
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-    const refreshKey = useRef(0);
-    const [, setRefreshTrigger] = useState(0);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    // Función para refrescar los datos
-    const refetchData = async (types: string[] = ['income', 'expense']) => {
+    // Función para refrescar los datos de debts
+    const refetchDebts = async () => {
         try {
-            const typesString = types.length > 0 ? types.join(',') : 'income,expense';
-            const [financeResponse, debtsResponse] = await Promise.all([
-                getFinances(1, 10, { types: typesString }),
-                getDebts(),
-            ]);
-
-            // Procesar datos de movimientos - pasar directamente sin mapear
-            if (financeResponse?.data.data) {
-                setMovements(financeResponse.data.data);
-            }
+            const debtsResponse = await getDebts();
 
             // Procesar datos de deudas (fixeds e installments)
             if (debtsResponse?.data) {
@@ -42,25 +27,13 @@ export default function Home() {
                 setInstallments(debtsResponse.data.installments as InstallmentRecord[]);
             }
         } catch (error) {
-            console.error('Error fetching finances:', error);
+            console.error('Error fetching debts:', error);
         }
     };
 
-    // Función para actualizar mes y año cuando el calendario cambia
-    const handleMonthYearChange = (month: number, year: number) => {
-        setCurrentMonth(month);
-        setCurrentYear(year);
-    };
-    const notifyDataUpdated = () => {
-        // Trigger para que Calendar se refresque
-        refreshKey.current += 1;
-        setRefreshTrigger(prev => prev + 1);
-        // Refrescar tablas
-        refetchData();
-    };
-
+    // Cargar datos de debts al montar el componente
     useEffect(() => {
-        refetchData();
+        refetchDebts();
     }, []);
 
     return (
@@ -71,28 +44,22 @@ export default function Home() {
                 </h1>
 
                 {/* Balance Stats */}
-                <BalanceIndicator 
-                    month={currentMonth} 
-                    year={currentYear}
-                    onDataUpdated={() => refetchData()}
-                />
+                <BalanceIndicator month={new Date().getMonth() + 1} year={new Date().getFullYear()} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
                     {/* Left side - Registro Form */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
-                            <RegistroForm onDataUpdated={notifyDataUpdated} />
+                            <RegistroForm onDataUpdated={() => {
+                                refetchDebts();
+                                setRefreshTrigger(prev => prev + 1);
+                            }} />
                         </div>
                     </div>
 
                     {/* Right side - Calendar */}
                     <div className="lg:col-span-4">
-                        <Calendar 
-                            key={refreshKey.current} 
-                            onMonthYearChange={handleMonthYearChange}
-                            installments={installments}
-                            fixeds={fixeds}
-                        />
+                        <Calendar />
                     </div>
                 </div>
 
@@ -141,7 +108,7 @@ export default function Home() {
                 </div>
 
                 {/* Tables */}
-                {tableView === 'movements' && <MovementsTable movements={movements} onTypesChange={(types) => refetchData(types)} />}
+                {tableView === 'movements' && <MovementsTable refreshTrigger={refreshTrigger} />}
                 {/* {tableView === 'debts' && <DebtTable debts={debts} />} */}
                 {tableView === 'fixeds' && <FixedTable fixeds={fixeds as unknown as any} />}
                 {tableView === 'installments' && <InstallmentTable installments={installments as unknown as any} />}

@@ -20,10 +20,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Call seeders for income, expenses, fixed and installments
+        // Call seeders for fixed, installments and transactions
         $this->call([
-            IncomeSeeder::class,
-            ExpenseSeeder::class,
             FixedSeeder::class,
             InstallmentSeeder::class,
             TransactionSeeder::class,

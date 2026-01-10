@@ -4,17 +4,15 @@ import { getSummary } from '../api/finances.api';
 interface BalanceIndicatorProps {
     month?: number;
     year?: number;
-    onDataUpdated?: () => void;
 }
 
-export default function BalanceIndicator({ month, year, onDataUpdated }: BalanceIndicatorProps) {
+export default function BalanceIndicator({ month, year }: BalanceIndicatorProps) {
     const [data, setData] = useState<any>({
         available_balance: 0,
         total_debt: 0,
         current_month_income: 0,
         current_month_debt: 0,
     });
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchSummary = async () => {
@@ -25,13 +23,11 @@ export default function BalanceIndicator({ month, year, onDataUpdated }: Balance
                 }
             } catch (error) {
                 console.error('Error fetching summary:', error);
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchSummary();
-    }, [month, year, onDataUpdated]);
+    }, [month, year]);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

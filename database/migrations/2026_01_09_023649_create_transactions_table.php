@@ -16,9 +16,9 @@ return new class extends Migration {
             $table->decimal('discount', 10, 2)->default(0);
             $table->dateTime('transaction_date')->nullable();
             $table->string('category');
-            $table->string('type'); // 'income', 'expense', 'fixed', 'installment'\
+            $table->string('type'); // 'income', 'expense', 'fixed', 'installment'
             $table->string('status')->default('pending'); // 'pending', 'completed', 'failed'
-            $table->morphs('transactionable'); // Create transactionable_id and transactionable_type columns
+            $table->nullableMorphs('transactionable'); // Create nullable transactionable_id and transactionable_type columns
             $table->timestamps();
             $table->softDeletes();
         });

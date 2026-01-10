@@ -1,7 +1,7 @@
 export type CreateIncomeData = {
-    amount: number;
+    amount: number | string;
     description: string;
-    discount: number;
+    // discount: number;
     transaction_date: string;
     category: string;
 };

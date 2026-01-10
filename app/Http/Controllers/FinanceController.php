@@ -15,14 +15,18 @@ class FinanceController extends Controller {
     public function index(Request $request) {
         $month = $request->query('month');
         $year = $request->query('year');
+        $limit = $request->query('limit', 10);
+        $types = $request->query('types'); // 'income,expense' format
 
         $transactions = Transaction::with('transactionable')
             ->byMonthAndYear($month, $year)
-            ->orderByDesc('transaction_date');
+            ->byType($types)
+            ->orderByDesc('transaction_date')
+            ->paginate($limit);
 
         return response()->json([
             'message' => 'Lista de transacciones',
-            'data' => $transactions->get(),
+            'data' => $transactions,
         ]);
     }
 

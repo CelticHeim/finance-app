@@ -2,15 +2,14 @@ import { useForm } from 'react-hook-form';
 import { createExpense } from '@/api/expenses.api';
 import { createFixed } from '@/api/fixed.api';
 import { createInstallment } from '@/api/installment.api';
+import type { CreateExpenseData } from '@/types/expenses.type';
+import type { CreateFixedData } from '@/types/fixeds.type';
+import type { CreateInstallmentData } from '@/types/installments.type';
 
-interface ExpenseFormData {
-    amount: number;
-    category: string;
-    description?: string;
-    expense_date: string;
-    expenseType: 'normal' | 'fixed' | 'installment';
-    total_installments?: number;
-    day_of_month?: number;
+interface ExpenseFormData extends CreateExpenseData {
+    expenseType: 'expense' | 'fixed' | 'installment';
+    number_of_installments?: number;
+    amount?: number;
 }
 
 interface ExpenseFormProps {
@@ -20,13 +19,12 @@ interface ExpenseFormProps {
 export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
     const { register, handleSubmit, reset, watch } = useForm<ExpenseFormData>({
         defaultValues: {
-            amount: 0,
+            amount: undefined,
             category: 'comida',
             description: '',
-            expense_date: new Date().toISOString().split('T')[0],
-            expenseType: 'normal',
-            total_installments: 3,
-            day_of_month: 10,
+            transaction_date: new Date().toISOString().split('T')[0],
+            expenseType: 'expense',
+            number_of_installments: 3,
         },
     });
 
@@ -42,34 +40,43 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
 
     const onSubmit = async (data: ExpenseFormData) => {
         try {
-            if (data.expenseType === 'fixed' && data.day_of_month) {
+            if (data.expenseType === 'fixed') {
                 // Crear gasto fijo
-                await createFixed({
+                const fixedData: CreateFixedData = {
                     amount: data.amount,
                     category: data.category,
                     description: data.description,
-                    day_of_month: data.day_of_month,
-                });
-            } else if (data.expenseType === 'installment' && data.total_installments && data.day_of_month) {
+                    due_date: data.transaction_date,
+                };
+                await createFixed(fixedData);
+            } else if (data.expenseType === 'installment') {
                 // Crear gasto a plazos
-                await createInstallment({
+                const installmentData: CreateInstallmentData = {
                     amount: data.amount,
-                    number_of_installments: parseInt(String(data.total_installments)),
-                    due_date: data.expense_date,
-                });
-            } else if (data.expenseType === 'normal') {
+                    description: data.description,
+                    category: data.category,
+                    number_of_installments: data.number_of_installments || 3,
+                    due_date: data.transaction_date,
+                };
+                await createInstallment(installmentData);
+            } else {
                 // Crear gasto normal
-                await createExpense(data);
+                const expenseData: CreateExpenseData = {
+                    amount: data.amount,
+                    description: data.description,
+                    transaction_date: data.transaction_date,
+                    category: data.category,
+                };
+                await createExpense(expenseData);
             }
 
             reset({
-                amount: 0,
+                amount: undefined,
                 category: 'comida',
                 description: '',
-                expense_date: new Date().toISOString().split('T')[0],
-                expenseType: 'normal',
-                total_installments: 3,
-                day_of_month: 10,
+                transaction_date: new Date().toISOString().split('T')[0],
+                expenseType: 'expense',
+                number_of_installments: 3,
             });
             onSubmitSuccess?.();
         } catch (error) {
@@ -89,7 +96,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                     step="0.01"
                     placeholder="0.00"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                    {...register('amount')}
+                    {...register('amount', { valueAsNumber: true })}
                 />
             </div>
 
@@ -146,7 +153,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 <input
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                    {...register('expense_date')}
+                    {...register('transaction_date')}
                 />
             </div>
 
@@ -199,23 +206,6 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 </div>
             </div>
 
-            {/* Day of month - for fixed and installment expenses */}
-            {(expenseType === 'fixed' || expenseType === 'installment') && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Día del mes de pago
-                    </label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="31"
-                        placeholder="10"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                        {...register('day_of_month')}
-                    />
-                </div>
-            )}
-
             {/* Installments count - only for installment expenses */}
             {expenseType === 'installment' && (
                 <div>
@@ -224,7 +214,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                     </label>
                     <select
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                        {...register('total_installments')}
+                        {...register('number_of_installments', { valueAsNumber: true })}
                     >
                         <option value="1">1 cuota</option>
                         <option value="3">3 cuotas</option>

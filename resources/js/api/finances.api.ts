@@ -4,16 +4,16 @@ import type { FinanceResponse, SummaryResponse, DebtsResponse } from "@/types/fi
 export const getFinances = async (
     page: number = 1,
     limit: number = 10,
-    month?: number,
-    year?: number
+    filters?: { month?: number; year?: number; types?: string }
 ): Promise<FinanceResponse | undefined> => {
     try {
         const { data } = await api.get('/finances', {
             params: {
                 page,
                 limit,
-                ...(month && { month }),
-                ...(year && { year }),
+                ...(filters?.month && { month: filters.month }),
+                ...(filters?.year && { year: filters.year }),
+                ...(filters?.types && { types: filters.types }),
             },
         });
         return data;

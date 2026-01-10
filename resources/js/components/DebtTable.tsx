@@ -125,7 +125,7 @@ export default function DebtTable({ debts }: DebtTableProps) {
                                 </td>
                                 <td className="py-4 px-4 text-right">
                                     <div className="font-bold text-gray-900 dark:text-white">
-                                        ${debt.amount.toFixed(2)}
+                                        ${parseFloat(debt.amount).toFixed(2)}
                                     </div>
                                 </td>
                                 <td className="py-4 px-4">
@@ -176,7 +176,7 @@ export default function DebtTable({ debts }: DebtTableProps) {
                     <p className="text-2xl font-bold text-blue-900 dark:text-blue-300 mt-2">
                         ${dataToShow
                             .filter((d) => d.status === 'pending')
-                            .reduce((sum, d) => sum + d.amount, 0)
+                            .reduce((sum, d) => sum + parseFloat(d.amount), 0)
                             .toFixed(2)}
                     </p>
                 </div>
@@ -187,7 +187,7 @@ export default function DebtTable({ debts }: DebtTableProps) {
                     <p className="text-2xl font-bold text-red-900 dark:text-red-300 mt-2">
                         ${dataToShow
                             .filter((d) => d.status === 'overdue')
-                            .reduce((sum, d) => sum + d.amount, 0)
+                            .reduce((sum, d) => sum + parseFloat(d.amount), 0)
                             .toFixed(2)}
                     </p>
                 </div>
@@ -198,7 +198,7 @@ export default function DebtTable({ debts }: DebtTableProps) {
                     <p className="text-2xl font-bold text-green-900 dark:text-green-300 mt-2">
                         ${dataToShow
                             .filter((d) => d.status === 'paid')
-                            .reduce((sum, d) => sum + d.amount, 0)
+                            .reduce((sum, d) => sum + parseFloat(d.amount), 0)
                             .toFixed(2)}
                     </p>
                 </div>

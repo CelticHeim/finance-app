@@ -94,7 +94,7 @@ export default function InstallmentTable({ installments }: InstallmentTableProps
                                         Cuota {installment.current_installment}/{installment.number_of_installments}
                                     </td>
                                     <td className="py-4 px-4 text-right text-gray-900 dark:text-gray-100 font-semibold">
-                                        ${installment.amount.toFixed(2)}
+                                        ${parseFloat(installment.amount).toFixed(2)}
                                     </td>
                                     <td className="py-4 px-4 text-gray-600 dark:text-gray-400">
                                         {formatDate(installment.due_date)}

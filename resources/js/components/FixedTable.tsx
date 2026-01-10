@@ -70,7 +70,7 @@ export default function FixedTable({ fixeds }: FixedTableProps) {
                                         </span>
                                     </td>
                                     <td className="py-4 px-4 text-right text-gray-900 dark:text-gray-100 font-semibold">
-                                        ${fixed.amount.toFixed(2)}
+                                        ${parseFloat(fixed.amount).toFixed(2)}
                                     </td>
                                     <td className="py-4 px-4 text-center text-gray-600 dark:text-gray-400 font-medium">
                                         {fixed.day_of_month}

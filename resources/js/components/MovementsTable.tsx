@@ -1,21 +1,23 @@
-import { useState } from 'react';
-
-interface Movement {
-    id: string;
-    description: string;
-    amount: number;
-    type: 'income' | 'expense';
-    category: string;
-    categoryColor: string;
-    date: string;
-    notes?: string;
-}
+import { TransactionRecord } from '@/types/transactions.type';
+import { useState, useEffect, useRef } from 'react';
+import MultiSelect from './ui/MultiSelect';
 
 interface MovementsTableProps {
-    movements?: Movement[];
+    movements?: TransactionRecord[];
+    onTypesChange?: (types: string[]) => void;
 }
 
-export default function MovementsTable({ movements }: MovementsTableProps) {
+export default function MovementsTable({ movements, onTypesChange }: MovementsTableProps) {
+    // Mapeo de tipos a nombres en español
+    const typeLabels: Record<string, string> = {
+        'income': 'Ingresos',
+        'expense': 'Gastos',
+        'installment': 'Cuotas',
+        'fixed': 'Gastos Fijos'
+    };
+
+    const typeOptions = ['income', 'expense', 'installment', 'fixed'];
+
     // Get current month's first and last day
     const getCurrentMonthRange = () => {
         const now = new Date();
@@ -36,17 +38,48 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
     };
 
     const monthRange = getCurrentMonthRange();
-    const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+    const [selectedTypes, setSelectedTypes] = useState<string[]>(['income', 'expense']);
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterDateFrom, setFilterDateFrom] = useState(monthRange.from);
     const [filterDateTo, setFilterDateTo] = useState(monthRange.to);
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-    const dataToShow = movements || [];
+    // Debounce para cambios de tipos y hacer petición a la API
+    useEffect(() => {
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+
+        debounceTimer.current = setTimeout(() => {
+            if (onTypesChange) {
+                onTypesChange(selectedTypes);
+            }
+        }, 500); // 500ms de debounce
+
+        return () => {
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+        };
+    }, [selectedTypes, onTypesChange]);
+
+    // Filter data based on filters
+    const filteredData = (movements || []).filter((movement) => {
+        if (selectedTypes.length > 0 && !selectedTypes.includes(movement.type)) return false;
+        if (filterCategory !== 'all' && movement.category !== filterCategory) return false;
+        
+        const movementDate = movement.transaction_date?.split('T')[0] || '';
+        if (!movementDate || movementDate < filterDateFrom || movementDate > filterDateTo) return false;
+        
+        return true;
+    });
+
+    const dataToShow = filteredData;
     // Obtener categorías únicas
-    const categories = Array.from(new Set(dataToShow.map((m) => m.category)));
+    const categories = Array.from(new Set((movements || []).map((m) => m.category)));
 
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString + 'T00:00:00');
+        const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'short',
@@ -57,7 +90,7 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Historial de Movimientos
+                Historial de Transacciones
             </h2>
 
             {/* Filters */}
@@ -69,7 +102,7 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
                     {/* Reset Filters Button */}
                     <button
                         onClick={() => {
-                            setFilterType('all');
+                            setSelectedTypes(['income', 'expense']);
                             setFilterCategory('all');
                             setFilterDateFrom(monthRange.from);
                             setFilterDateTo(monthRange.to);
@@ -81,21 +114,19 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
 
                     {/* Filters Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
-                        {/* Type Filter */}
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                                Tipo
-                            </label>
-                            <select
-                                value={filterType}
-                                onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="all">Todos</option>
-                                <option value="income">Ingresos</option>
-                                <option value="expense">Gastos</option>
-                            </select>
-                        </div>
+                        {/* Type Filter - MultiSelect */}
+                        <MultiSelect
+                            options={typeOptions.map(type => typeLabels[type])}
+                            selected={selectedTypes.map(type => typeLabels[type])}
+                            onChange={(selected) => {
+                                const selectedKeys = selected.map(label => 
+                                    Object.entries(typeLabels).find(([, val]) => val === label)?.[0] || ''
+                                ).filter(Boolean);
+                                setSelectedTypes(selectedKeys);
+                            }}
+                            label="Tipo"
+                            placeholder="Seleccionar tipos..."
+                        />
 
                         {/* Category Filter */}
                         <div>
@@ -176,22 +207,16 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
                                         ? 'bg-white dark:bg-gray-800'
                                         : 'bg-gray-50 dark:bg-gray-800/50'
                                 }`}
-                                title={movement.notes || ''}
                             >
                                 <td className="py-4 px-4">
                                     <div className="font-medium text-gray-900 dark:text-white">
-                                        {movement.description}
+                                        {movement.description || 'Sin descripción'}
                                     </div>
-                                    {movement.notes && (
-                                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            {movement.notes}
-                                        </div>
-                                    )}
                                 </td>
                                 <td className="py-4 px-4">
                                     <div
                                         className="px-3 py-1 rounded-full text-xs font-semibold text-white w-fit"
-                                        style={{ backgroundColor: movement.categoryColor }}
+                                        style={{ backgroundColor: movement.type === 'income' ? '#10B981' : '#EF4444' }}
                                     >
                                         {movement.category}
                                     </div>
@@ -201,6 +226,10 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
                                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                             movement.type === 'income'
                                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                : movement.type === 'fixed'
+                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                : movement.type === 'installment'
+                                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                                                 : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                                         }`}
                                     >
@@ -212,15 +241,19 @@ export default function MovementsTable({ movements }: MovementsTableProps) {
                                         className={`font-bold text-lg ${
                                             movement.type === 'income'
                                                 ? 'text-green-600 dark:text-green-400'
+                                                : movement.type === 'fixed'
+                                                ? 'text-blue-600 dark:text-blue-400'
+                                                : movement.type === 'installment'
+                                                ? 'text-purple-600 dark:text-purple-400'
                                                 : 'text-red-600 dark:text-red-400'
                                         }`}
                                     >
-                                        {movement.type === 'income' ? '+' : '-'} ${movement.amount.toFixed(2)}
+                                        {movement.type === 'income' ? '+' : '-'} ${parseFloat(movement.amount).toFixed(2)}
                                     </div>
                                 </td>
                                 <td className="py-4 px-4">
                                     <div className="font-medium text-gray-700 dark:text-gray-300">
-                                        {formatDate(movement.date)}
+                                        {formatDate(movement.transaction_date.split('T')[0])}
                                     </div>
                                 </td>
                             </tr>

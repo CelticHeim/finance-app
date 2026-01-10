@@ -31,7 +31,7 @@ class ExpenseController extends Controller {
 
         return response()->json([
             'message' => 'Gasto registrado exitosamente',
-            'data' => $expense->load('installments'),
+            'data' => $expense,
         ], 201);
     }
 }

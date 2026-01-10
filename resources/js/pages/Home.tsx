@@ -2,80 +2,44 @@ import { useState, useEffect, useRef } from 'react';
 import RegistroForm from '../components/RegistroForm';
 import Calendar from '../components/calendar/Calendar';
 import BalanceIndicator from '../components/BalanceIndicator';
-import DebtTable from '../components/DebtTable';
 import MovementsTable from '../components/MovementsTable';
 import InstallmentTable from '../components/InstallmentTable';
 import FixedTable from '../components/FixedTable';
 import { getFinances, getDebts } from '../api/finances.api';
+import type { TransactionRecord } from '../types/transactions.type';
+import type { InstallmentRecord } from '../types/installments.type';
+import type { FixedRecord } from '../types/fixeds.type';
 
 export default function Home() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
-    const [movements, setMovements] = useState<any[]>([]);
-    const [debts, setDebts] = useState<any[]>([]);
-    const [installments, setInstallments] = useState<any[]>([]);
-    const [fixeds, setFixeds] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    
+    const [movements, setMovements] = useState<TransactionRecord[]>([]);
+    const [installments, setInstallments] = useState<InstallmentRecord[]>([]);
+    const [fixeds, setFixeds] = useState<FixedRecord[]>([]);
+    
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const refreshKey = useRef(0);
     const [, setRefreshTrigger] = useState(0);
-    const [updateTrigger, setUpdateTrigger] = useState(0);
 
     // Función para refrescar los datos
-    const refetchData = async () => {
+    const refetchData = async (types: string[] = ['income', 'expense']) => {
         try {
+            const typesString = types.length > 0 ? types.join(',') : 'income,expense';
             const [financeResponse, debtsResponse] = await Promise.all([
-                getFinances(1),
+                getFinances(1, 10, { types: typesString }),
                 getDebts(),
             ]);
 
-            // Procesar datos de movimientos
+            // Procesar datos de movimientos - pasar directamente sin mapear
             if (financeResponse?.data.data) {
-                const mappedMovements = financeResponse.data.data.map(record => ({
-                    id: `${record.type}-${record.id}`,
-                    description: record.description || record.category,
-                    amount: parseFloat(record.amount),
-                    type: record.type,
-                    category: record.category,
-                    categoryColor: record.type === 'income' ? '#10B981' : '#EF4444',
-                    date: record.transaction_date,
-                }));
-                setMovements(mappedMovements);
-
-                const mappedDebts = financeResponse.data.data
-                    .filter(record => record.type === 'expense')
-                    .map(record => ({
-                        id: `${record.type}-${record.id}`,
-                        description: record.description || record.category,
-                        amount: parseFloat(record.amount),
-                        dueDate: record.transaction_date,
-                        status: 'pending' as const,
-                        category: record.category,
-                        categoryColor: '#EF4444',
-                    }));
-                setDebts(mappedDebts);
+                setMovements(financeResponse.data.data);
             }
 
             // Procesar datos de deudas (fixeds e installments)
             if (debtsResponse?.data) {
-                const mappedFixeds = debtsResponse.data.fixeds.map(fixed => ({
-                    id: `fixed-${fixed.id}`,
-                    amount: parseFloat(fixed.amount),
-                    category: fixed.category,
-                    description: fixed.description,
-                    day_of_month: fixed.day_of_month,
-                }));
-                setFixeds(mappedFixeds);
-
-                const mappedInstallments = debtsResponse.data.installments.map(inst => ({
-                    id: `installment-${inst.id}`,
-                    amount: parseFloat(inst.amount),
-                    number_of_installments: inst.number_of_installments,
-                    current_installment: inst.current_installment,
-                    due_date: inst.due_date,
-                    status: inst.status,
-                }));
-                setInstallments(mappedInstallments);
+                setFixeds(debtsResponse.data.fixeds as FixedRecord[]);
+                setInstallments(debtsResponse.data.installments as InstallmentRecord[]);
             }
         } catch (error) {
             console.error('Error fetching finances:', error);
@@ -93,12 +57,10 @@ export default function Home() {
         setRefreshTrigger(prev => prev + 1);
         // Refrescar tablas
         refetchData();
-        // Trigger para que BalanceIndicator se refresque
-        setUpdateTrigger(prev => prev + 1);
     };
 
     useEffect(() => {
-        refetchData().then(() => setLoading(false));
+        refetchData();
     }, []);
 
     return (
@@ -112,7 +74,7 @@ export default function Home() {
                 <BalanceIndicator 
                     month={currentMonth} 
                     year={currentYear}
-                    onDataUpdated={() => setUpdateTrigger(prev => prev + 1)}
+                    onDataUpdated={() => refetchData()}
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
@@ -154,7 +116,7 @@ export default function Home() {
                                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                     >
-                        📊 Movimientos
+                        📊 Transacciones
                     </button>
                     <button
                         onClick={() => setTableView('installments')}
@@ -179,10 +141,10 @@ export default function Home() {
                 </div>
 
                 {/* Tables */}
-                {tableView === 'movements' && <MovementsTable movements={movements} />}
+                {tableView === 'movements' && <MovementsTable movements={movements} onTypesChange={(types) => refetchData(types)} />}
                 {/* {tableView === 'debts' && <DebtTable debts={debts} />} */}
-                {tableView === 'fixeds' && <FixedTable fixeds={fixeds} />}
-                {tableView === 'installments' && <InstallmentTable installments={installments} />}
+                {tableView === 'fixeds' && <FixedTable fixeds={fixeds as unknown as any} />}
+                {tableView === 'installments' && <InstallmentTable installments={installments as unknown as any} />}
             </div>
         </div>
     );

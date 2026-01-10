@@ -13,7 +13,7 @@ class IncomeController extends Controller {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string',
-            'discount' => 'nullable|numeric|min:0',
+            // 'discount' => 'nullable|numeric|min:0',
             'transaction_date' => 'required|date',
             'category' => 'required|string',
         ]);

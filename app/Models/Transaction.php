@@ -40,4 +40,13 @@ class Transaction extends Model {
 
         return $query;
     }
+
+    public function scopeByType($query, $types = null) {
+        if ($types) {
+            $typeArray = array_map('trim', explode(',', $types));
+            $query->whereIn('type', $typeArray);
+        }
+
+        return $query;
+    }
 }

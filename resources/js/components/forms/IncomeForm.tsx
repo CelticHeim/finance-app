@@ -1,24 +1,19 @@
 import { useForm } from 'react-hook-form';
 import { createIncome } from '@/api/incomes.api';
-
-interface IncomeFormData {
-    amount: number;
-    category: string;
-    description?: string;
-    entry_date: string;
-}
+import type { CreateIncomeData } from '@/types/incomes.type';
 
 interface IncomeFormProps {
     onSubmitSuccess?: () => void;
 }
 
 export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
-    const { register, handleSubmit, reset, watch } = useForm<IncomeFormData>({
+    const { register, handleSubmit, reset, watch } = useForm<CreateIncomeData>({
         defaultValues: {
-            amount: 0,
+            amount: '',
             category: 'sueldo',
-            description: '',
-            entry_date: new Date().toISOString().split('T')[0],
+            description: 'Sueldo semanal',
+            // discount: 0,
+            transaction_date: new Date().toISOString().split('T')[0],
         },
     });
 
@@ -31,13 +26,14 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
 
     const selectedCategory = watch('category');
 
-    const onSubmit = async (data: IncomeFormData) => {
+    const onSubmit = async (data: CreateIncomeData) => {
         await createIncome(data);
         reset({
-            amount: 0,
+            amount: '',
             category: 'sueldo',
-            description: '',
-            entry_date: new Date().toISOString().split('T')[0],
+            description: 'Sueldo semanal',
+            // discount: 0,
+            transaction_date: new Date().toISOString().split('T')[0],
         });
         // Ejecutar callback después de éxito
         onSubmitSuccess?.();
@@ -55,7 +51,7 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
                     step="0.01"
                     placeholder="0.00"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-                    {...register('amount')}
+                    {...register('amount', { valueAsNumber: true })}
                 />
             </div>
 
@@ -112,7 +108,7 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
                 <input
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-                    {...register('entry_date')}
+                    {...register('transaction_date')}
                 />
             </div>
 

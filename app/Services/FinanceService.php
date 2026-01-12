@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Fixed;
 use App\Models\Installment;
 use App\Models\Transaction;
+use Carbon\Carbon;
 
 class FinanceService {
     public function getSummary($month, $year) {
@@ -36,17 +37,7 @@ class FinanceService {
             'current_month_debt' => $currentMonthDebt,
         ];
     }
-
-    // public function getDebts() {
-    //     $fixeds = Fixed::all();
-    //     $installments = Installment::where('status', 'pending')->get();
-
-    //     return [
-    //         'fixeds' => $fixeds,
-    //         'installments' => $installments,
-    //     ];
-    // }
-
+    
     public function getFixeds() {
         return Fixed::all();
     }
@@ -54,4 +45,33 @@ class FinanceService {
     public function getInstallments() {
         return Installment::where('status', 'pending')->get();
     }
+
+    public function getCalendarTransactions($month, $year) {
+        $transactions = Transaction::with('transactionable')
+            ->byMonthAndYear($month, $year)
+            ->get();
+
+        $paidFixedIds = collect($transactions)
+            ->where('type', 'fixed')
+            ->pluck('id')
+            ->toArray();
+
+        $fixeds = Fixed::all()->map(function($fixed) use ($month, $year, $paidFixedIds) {
+            $day = $fixed->day_of_month ?? ($fixed->due_date?->day ?? 1);
+            $transactionDate = Carbon::createFromDate($year, $month, $day, 'UTC')->toDateString();
+
+            return (object) [
+                'id' => $fixed->id,
+                'type' => 'fixed',
+                'description' => $fixed->description,
+                'category' => $fixed->category,
+                'amount' => $fixed->amount,
+                'transaction_date' => $transactionDate,
+                'status' => in_array($fixed->id, $paidFixedIds) ? 'paid' : 'pending',
+            ];
+        });
+
+        return $transactions->concat($fixeds);
+    }
 }
+

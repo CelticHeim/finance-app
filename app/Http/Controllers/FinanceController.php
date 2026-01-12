@@ -17,21 +17,16 @@ class FinanceController extends Controller {
     public function index() {
         $now = now();
 
-        $transactions = Transaction::with('transactionable')
-            ->byMonthAndYear($now->month, $now->year)
-            ->orderByDesc('transaction_date')
-            ->get();
+        // Obtener datos del calendario que incluyen transactions, fixeds y summary
+        $calendarData = $this->financeService->getCalendarTransactions($now->month, $now->year);
         $summary = $this->financeService->getSummary($now->month, $now->year);
-
-        $fixeds = $this->financeService->getFixeds();
         $installments = $this->financeService->getInstallments();
 
         return response()->json([
             'message' => 'Resumen financiero y transacciones del mes actual',
             'data' => [
-                'transactions' => $transactions,
+                'transactions' => $calendarData,
                 'summary' => $summary,
-                'fixeds' => $fixeds,
                 'installments' => $installments,
             ],
         ]);
@@ -55,44 +50,21 @@ class FinanceController extends Controller {
         ]);
     }
 
-    // public function getSummary(Request $request) {
-    //     $month = $request->query('month', now()->month);
-    //     $year = $request->query('year', now()->year);
-
-    //     $summaryData = $this->financeService->getSummary($month, $year);
-
-    //     return response()->json([
-    //         'message' => 'Resumen financiero',
-    //         'data' => $summaryData,
-    //     ]);
-    // }
-
     public function getCalendarTransactions(Request $request) {
         $month = $request->query('month', now()->month);
         $year = $request->query('year', now()->year);
 
-        $transactions = Transaction::with('transactionable')
-            ->byMonthAndYear($month, $year)
-            ->get();
-        $summaryData = $this->financeService->getSummary($month, $year);
+        $transactions = $this->financeService->getCalendarTransactions($month, $year);
+        $summary = $this->financeService->getSummary($month, $year);
 
         return response()->json([
-            'message' => 'Resumen financiero',
+            'message' => 'Transacciones del calendario',
             'data' => [
                 'transactions' => $transactions,
-                'summary' => $summaryData,
+                'summary' => $summary,
             ],
         ]);
     }
-
-    // public function getDebts() {
-    //     $debtsData = $this->financeService->getDebts();
-
-    //     return response()->json([
-    //         'message' => 'Lista de deudas (gastos fijos y cuotas)',
-    //         'data' => $debtsData,
-    //     ]);
-    // }
 
     public function getFixeds() {
         $fixeds = $this->financeService->getFixeds();

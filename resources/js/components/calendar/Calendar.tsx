@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import CalendarGrid from './CalendarGrid';
 import { useFinance } from '../../contexts/FinanceContext';
-import type { FixedRecord } from '../../types/fixeds.type';
 
 interface DayEvent {
     id: string;
@@ -19,8 +18,7 @@ export default function Calendar() {
     const { 
         currentMonth, 
         currentYear, 
-        transactions, 
-        fixeds, 
+        transactions,
         setMonth 
     } = useFinance();
     
@@ -28,117 +26,28 @@ export default function Calendar() {
 
     // Procesar eventos desde contexto
     useEffect(() => {
-        try {
-            let allEvents: DayEvent[] = [];
+        const mappedEvents = (transactions || []).map(record => {
+            const colorMap = {
+                'income': '#10B981',
+                'fixed': '#3B82F6',
+                'installment': '#A855F7',
+                'expense': '#EF4444',
+            };
 
-            // Procesar transacciones del contexto
-            if (transactions && Array.isArray(transactions)) {
-                const mappedEvents = transactions.map(record => {
-                    let color = '#EF4444'; // Default rojo
-                    let isPaid = true;
+            return {
+                id: `${record.type}-${record.id}`,
+                title: record.description || record.category,
+                amount: parseFloat(record.amount),
+                color: colorMap[record.type as keyof typeof colorMap] || '#EF4444',
+                type: record.type,
+                date: record.transaction_date?.split('T')[0] || record.transaction_date,
+                isPaid: record.status === 'paid',
+                fixedId: record.type === 'fixed' ? record.id : undefined,
+            };
+        });
 
-                    if (record.type === 'income') {
-                        color = '#10B981'; // Verde
-                    } else if (record.type === 'fixed') {
-                        color = '#3B82F6'; // Azul
-                    } else if (record.type === 'installment') {
-                        color = '#A855F7'; // Morado
-                        // Para installments, usar el status del registro
-                        isPaid = record.status === 'paid';
-                    }
-
-                    return {
-                        id: `${record.type}-${record.id}`,
-                        title: record.description || record.category,
-                        amount: parseFloat(record.amount),
-                        color: color,
-                        type: record.type,
-                        date: record.transaction_date?.split('T')[0] || record.transaction_date,
-                        isPaid: isPaid,
-                        fixedId: record.type === 'fixed' ? record.id : undefined,
-                    };
-                });
-                allEvents = [...mappedEvents];
-            }
-
-            // Procesar gastos fijos del prop - siempre mostrar todos en todos los meses
-            if (fixeds && fixeds.length > 0) {
-                // Obtener IDs de fixeds pagados en este mes desde las transacciones
-                const paidFixedIds = allEvents
-                    .filter(event => event.type === 'fixed')
-                    .map(event => event.fixedId)
-                    .filter((id): id is number => id !== undefined);
-
-                // Por cada fixed del prop, crear un evento si no existe en los eventos
-                fixeds.forEach(fixed => {
-                    // Extraer el día del due_date (puede ser ISO string o número)
-                    let dueDay: number;
-
-                    if (typeof fixed.due_date === 'string') {
-                        // Si es una fecha ISO, extraer solo el día
-                        if (fixed.due_date.includes('T')) {
-                            // Formato: 2026-01-05T00:00:00.000000Z
-                            const dateObj = new Date(fixed.due_date);
-                            dueDay = dateObj.getDate();
-                        } else {
-                            // Formato: 2026-01-05
-                            const dateObj = new Date(fixed.due_date);
-                            dueDay = dateObj.getDate();
-                        }
-                    } else {
-                        // Si es número, usarlo directamente
-                        dueDay = parseInt(String(fixed.due_date), 10);
-                    }
-
-                    // Validar que sea un día válido
-                    if (isNaN(dueDay) || dueDay < 1 || dueDay > 31) {
-                        console.warn(`Invalid due_date for fixed ${fixed.id}: ${fixed.due_date}`);
-                        return;
-                    }
-
-                    // Crear la fecha del pago
-                    const date = new Date(currentYear, currentMonth, dueDay);
-                    const dateStr = date.toISOString().split('T')[0];
-
-                    // Determinar si este fixed fue pagado comparando con los de transacciones
-                    const isPaid = paidFixedIds.includes(fixed.id);
-
-                    // Verificar si ya existe un evento de este fixed (pagado desde transacciones)
-                    const alreadyExists = allEvents.some(
-                        e => e.type === 'fixed' && e.fixedId === fixed.id
-                    );
-
-                    // Siempre agregar el fixed (pagado o no)
-                    // Si ya existe pagado, no lo agregaremos de nuevo (alreadyExists es true)
-                    // Si no existe, lo agregamos con isPaid = false
-                    if (!alreadyExists) {
-                        allEvents.push({
-                            id: `fixed-${fixed.id}`,
-                            title: fixed.description || fixed.category,
-                            amount: parseFloat(fixed.amount),
-                            color: '#3B82F6',
-                            type: 'fixed',
-                            date: dateStr,
-                            isPaid: isPaid,
-                            fixedId: fixed.id,
-                        });
-                    } else {
-                        // Si ya existe (fue pagado), actualizar isPaid a true
-                        const existingEvent = allEvents.find(
-                            e => e.type === 'fixed' && e.fixedId === fixed.id
-                        );
-                        if (existingEvent) {
-                            existingEvent.isPaid = true;
-                        }
-                    }
-                });
-            }
-
-            setEvents(allEvents);
-        } catch (error) {
-            console.error('Error processing calendar events:', error);
-        }
-    }, [currentMonth, currentYear, fixeds, transactions]);
+        setEvents(mappedEvents);
+    }, [currentMonth, currentYear, transactions]);
 
     const monthName = new Date(currentYear, currentMonth, 1).toLocaleString('es-ES', {
         month: 'long',

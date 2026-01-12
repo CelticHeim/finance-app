@@ -61,10 +61,13 @@ export default function Home() {
 
                     {/* Right side - Calendar */}
                     <div className="lg:col-span-4">
-                        <Calendar onMonthYearChange={(month, year) => {
-                            setSelectedMonth(month);
-                            setSelectedYear(year);
-                        }} />
+                        <Calendar 
+                            fixeds={fixeds}
+                            onMonthYearChange={(month, year) => {
+                                setSelectedMonth(month);
+                                setSelectedYear(year);
+                            }} 
+                        />
                     </div>
                 </div>
 

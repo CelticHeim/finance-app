@@ -7,6 +7,8 @@ interface DayEvent {
     color: string;
     type: 'income' | 'expense' | 'fixed' | 'installment';
     date: string;
+    isPaid?: boolean;
+    fixedId?: number;
 }
 
 interface CalendarGridProps {

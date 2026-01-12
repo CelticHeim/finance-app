@@ -7,6 +7,8 @@ interface DayEvent {
     color: string;
     type: 'income' | 'expense' | 'fixed' | 'installment';
     date: string;
+    isPaid?: boolean;
+    fixedId?: number;
 }
 
 interface CalendarDayProps {
@@ -52,6 +54,7 @@ export default function CalendarDay({ day, isCurrentMonth, isToday, events, onCl
                         amount={event.amount}
                         color={event.color}
                         type={event.type}
+                        isPaid={event.isPaid}
                     />
                 ))}
                 {events.length === 0 && isCurrentMonth && (

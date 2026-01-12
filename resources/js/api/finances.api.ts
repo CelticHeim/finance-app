@@ -4,7 +4,8 @@ import type {
     TransactionsResponse, 
     SummaryResponse, 
     FixedsResponse,
-    InstallmentsResponse
+    InstallmentsResponse,
+    CalendarResponse
 } from "@/types/finances.types";
 
 // Obtiene el resumen completo del mes actual (transacciones, resumen, fixeds, installments)
@@ -61,6 +62,24 @@ export const getSummary = async (
 export const getFixeds = async (): Promise<FixedsResponse | undefined> => {
     try {
         const { data } = await api.get('/finances/fixeds');
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+// Obtiene datos para Calendar y BalanceIndicator (transacciones + summary del mes)
+export const getCalendarData = async (
+    month?: number,
+    year?: number
+): Promise<CalendarResponse | undefined> => {
+    try {
+        const { data } = await api.get('/finances/calendar', {
+            params: {
+                ...(month && { month }),
+                ...(year && { year }),
+            },
+        });
         return data;
     } catch (error) {
         console.error(error);

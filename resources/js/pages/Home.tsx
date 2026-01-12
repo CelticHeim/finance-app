@@ -5,43 +5,30 @@ import BalanceIndicator from '../components/BalanceIndicator';
 import MovementsTable from '../components/MovementsTable';
 import InstallmentTable from '../components/InstallmentTable';
 import FixedTable from '../components/FixedTable';
-import { getFinances, getTransactions } from '../api/finances.api';
-import type { InstallmentRecord } from '../types/installments.type';
-import type { FixedRecord } from '../types/fixeds.type';
-import type { TransactionRecord } from '../types/transactions.type';
-import type { SummaryData } from '../types/finances.types';
+import { FinanceProvider, useFinance } from '../contexts/FinanceContext';
 
-export default function Home() {
+function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    
-    const [installments, setInstallments] = useState<InstallmentRecord[]>([]);
-    const [fixeds, setFixeds] = useState<FixedRecord[]>([]);
-    const [summary, setSummary] = useState<SummaryData | null>(null);
-    const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-    // Cargar datos completos desde /finances
-    const refetchFinances = async () => {
-        try {
-            const financeResponse = await getFinances();
-
-            if (financeResponse?.data) {
-                setFixeds(financeResponse.data.fixeds as FixedRecord[]);
-                setInstallments(financeResponse.data.installments as InstallmentRecord[]);
-                setSummary(financeResponse.data.summary as SummaryData);
-                setTransactions(financeResponse.data.transactions as TransactionRecord[]);
-            }
-        } catch (error) {
-            console.error('Error fetching finances:', error);
-        }
-    };
+    
+    // Obtener datos y funciones del contexto
+    const {
+        summary,
+        transactions,
+        fixeds,
+        installments,
+        currentMonth,
+        currentYear,
+        loadInitialData,
+        notifyTransactionAdded,
+        notifyFixedAdded,
+        notifyInstallmentAdded,
+    } = useFinance();
 
     // Cargar datos al montar el componente
     useEffect(() => {
-        refetchFinances();
-    }, []);
+        loadInitialData();
+    }, [loadInitialData]);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -51,14 +38,15 @@ export default function Home() {
                 </h1>
 
                 {/* Balance Stats */}
-                {summary && <BalanceIndicator summary={summary} />}
+                <BalanceIndicator />
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-                    {/* Left side - Registro Form */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
                             <RegistroForm onDataUpdated={() => {
-                                refetchFinances();
+                                // Notificar según el tipo de registro agregado
+                                // Por ahora, notificamos transacción genérica
+                                notifyTransactionAdded();
                                 setRefreshTrigger(prev => prev + 1);
                             }} />
                         </div>
@@ -66,14 +54,7 @@ export default function Home() {
 
                     {/* Right side - Calendar */}
                     <div className="lg:col-span-4">
-                        <Calendar 
-                            fixeds={fixeds}
-                            transactions={transactions}
-                            onMonthYearChange={(month, year) => {
-                                setSelectedMonth(month);
-                                setSelectedYear(year);
-                            }} 
-                        />
+                        <Calendar />
                     </div>
                 </div>
 
@@ -123,11 +104,19 @@ export default function Home() {
 
                 {/* Tables */}
                 {tableView === 'movements' && <MovementsTable refreshTrigger={refreshTrigger} />}
-                {/* {tableView === 'debts' && <DebtTable debts={debts} />} */}
                 {tableView === 'fixeds' && <FixedTable fixeds={fixeds as unknown as any} />}
                 {tableView === 'installments' && <InstallmentTable installments={installments as unknown as any} />}
             </div>
         </div>
+    );
+}
+
+// Componente principal que provee el contexto
+export default function Home() {
+    return (
+        <FinanceProvider>
+            <HomeContent />
+        </FinanceProvider>
     );
 }
 

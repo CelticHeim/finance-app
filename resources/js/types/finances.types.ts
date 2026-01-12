@@ -43,3 +43,13 @@ export type InstallmentsResponse = {
     data: InstallmentRecord[];
 };
 
+// Respuesta del endpoint /finances/calendar (para Calendar y BalanceIndicator)
+export type CalendarResponse = {
+    message: string;
+    data: {
+        transactions: TransactionRecord[];
+        summary: SummaryData;
+    };
+};
+
+

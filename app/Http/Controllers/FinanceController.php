@@ -55,15 +55,33 @@ class FinanceController extends Controller {
         ]);
     }
 
-    public function getSummary(Request $request) {
+    // public function getSummary(Request $request) {
+    //     $month = $request->query('month', now()->month);
+    //     $year = $request->query('year', now()->year);
+
+    //     $summaryData = $this->financeService->getSummary($month, $year);
+
+    //     return response()->json([
+    //         'message' => 'Resumen financiero',
+    //         'data' => $summaryData,
+    //     ]);
+    // }
+
+    public function getCalendarTransactions(Request $request) {
         $month = $request->query('month', now()->month);
         $year = $request->query('year', now()->year);
 
+        $transactions = Transaction::with('transactionable')
+            ->byMonthAndYear($month, $year)
+            ->get();
         $summaryData = $this->financeService->getSummary($month, $year);
 
         return response()->json([
             'message' => 'Resumen financiero',
-            'data' => $summaryData,
+            'data' => [
+                'transactions' => $transactions,
+                'summary' => $summaryData,
+            ],
         ]);
     }
 

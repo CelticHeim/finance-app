@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('finances')->controller(FinanceController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('/transactions', 'getTransactions');
-    Route::get('/summary', 'getSummary');
+    Route::get('/calendar', 'getCalendarTransactions');
+    // Route::get('/summary', 'getSummary');
     // Route::get('/debts', 'getDebts');
     Route::get('/fixeds', 'getFixeds');
     Route::get('/installments', 'getInstallments');

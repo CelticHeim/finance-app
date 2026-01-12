@@ -1,10 +1,8 @@
-import type { SummaryData } from '../types/finances.types';
+import { useFinance } from '../contexts/FinanceContext';
 
-interface BalanceIndicatorProps {
-    summary: SummaryData;
-}
+export default function BalanceIndicator() {
+    const { summary } = useFinance();
 
-export default function BalanceIndicator({ summary }: BalanceIndicatorProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             {/* Balance */}

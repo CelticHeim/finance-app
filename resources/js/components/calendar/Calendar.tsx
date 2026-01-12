@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import CalendarGrid from './CalendarGrid';
+import { useFinance } from '../../contexts/FinanceContext';
 import type { FixedRecord } from '../../types/fixeds.type';
-import type { TransactionRecord } from '../../types/transactions.type';
 
 interface DayEvent {
     id: string;
@@ -15,23 +15,23 @@ interface DayEvent {
     fixedId?: number;
 }
 
-interface CalendarProps {
-    fixeds?: FixedRecord[];
-    transactions?: TransactionRecord[];
-    onMonthYearChange?: (month: number, year: number) => void;
-}
-
-export default function Calendar({ fixeds = [], transactions = [], onMonthYearChange }: CalendarProps) {
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+export default function Calendar() {
+    const { 
+        currentMonth, 
+        currentYear, 
+        transactions, 
+        fixeds, 
+        setMonth 
+    } = useFinance();
+    
     const [events, setEvents] = useState<DayEvent[]>([]);
 
-    // Procesar eventos desde props
+    // Procesar eventos desde contexto
     useEffect(() => {
         try {
             let allEvents: DayEvent[] = [];
 
-            // Procesar transacciones desde el prop
+            // Procesar transacciones del contexto
             if (transactions && Array.isArray(transactions)) {
                 const mappedEvents = transactions.map(record => {
                     let color = '#EF4444'; // Default rojo
@@ -138,10 +138,7 @@ export default function Calendar({ fixeds = [], transactions = [], onMonthYearCh
         } catch (error) {
             console.error('Error processing calendar events:', error);
         }
-        
-        // Notificar al componente padre cuando cambien mes/año
-        onMonthYearChange?.(currentMonth, currentYear);
-    }, [currentMonth, currentYear, fixeds, transactions, onMonthYearChange]);
+    }, [currentMonth, currentYear, fixeds, transactions]);
 
     const monthName = new Date(currentYear, currentMonth, 1).toLocaleString('es-ES', {
         month: 'long',
@@ -161,28 +158,33 @@ export default function Calendar({ fixeds = [], transactions = [], onMonthYearCh
         return map;
     }, [events]);
 
-    const handlePrevMonth = () => {
-        if (currentMonth === 0) {
-            setCurrentMonth(11);
-            setCurrentYear(currentYear - 1);
-        } else {
-            setCurrentMonth(currentMonth - 1);
+    const handlePrevMonth = async () => {
+        let newMonth = currentMonth - 1;
+        let newYear = currentYear;
+        
+        if (newMonth < 0) {
+            newMonth = 11;
+            newYear--;
         }
+        
+        await setMonth(newMonth, newYear);
     };
 
-    const handleNextMonth = () => {
-        if (currentMonth === 11) {
-            setCurrentMonth(0);
-            setCurrentYear(currentYear + 1);
-        } else {
-            setCurrentMonth(currentMonth + 1);
+    const handleNextMonth = async () => {
+        let newMonth = currentMonth + 1;
+        let newYear = currentYear;
+        
+        if (newMonth > 11) {
+            newMonth = 0;
+            newYear++;
         }
+        
+        await setMonth(newMonth, newYear);
     };
 
-    const handleToday = () => {
+    const handleToday = async () => {
         const today = new Date();
-        setCurrentMonth(today.getMonth());
-        setCurrentYear(today.getFullYear());
+        await setMonth(today.getMonth(), today.getFullYear());
     };
 
     return (

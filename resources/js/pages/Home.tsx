@@ -11,6 +11,8 @@ import type { FixedRecord } from '../types/fixeds.type';
 
 export default function Home() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     
     const [installments, setInstallments] = useState<InstallmentRecord[]>([]);
     const [fixeds, setFixeds] = useState<FixedRecord[]>([]);
@@ -44,7 +46,7 @@ export default function Home() {
                 </h1>
 
                 {/* Balance Stats */}
-                <BalanceIndicator month={new Date().getMonth() + 1} year={new Date().getFullYear()} />
+                <BalanceIndicator month={selectedMonth + 1} year={selectedYear} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
                     {/* Left side - Registro Form */}
@@ -59,7 +61,10 @@ export default function Home() {
 
                     {/* Right side - Calendar */}
                     <div className="lg:col-span-4">
-                        <Calendar />
+                        <Calendar onMonthYearChange={(month, year) => {
+                            setSelectedMonth(month);
+                            setSelectedYear(year);
+                        }} />
                     </div>
                 </div>
 

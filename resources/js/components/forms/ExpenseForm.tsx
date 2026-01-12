@@ -10,6 +10,7 @@ interface ExpenseFormData extends CreateExpenseData {
     expenseType: 'expense' | 'fixed' | 'installment';
     number_of_installments?: number;
     amount?: number;
+    payment_day?: number;
 }
 
 interface ExpenseFormProps {
@@ -25,6 +26,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             transaction_date: new Date().toISOString().split('T')[0],
             expenseType: 'expense',
             number_of_installments: 3,
+            payment_day: 1,
         },
     });
 
@@ -46,10 +48,12 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                     amount: data.amount,
                     category: data.category,
                     description: data.description,
-                    due_date: data.transaction_date,
+                    due_date: data.payment_day?.toString() || '1',
                 };
                 await createFixed(fixedData);
-            } else if (data.expenseType === 'installment') {
+            } 
+            
+            if (data.expenseType === 'installment') {
                 // Crear gasto a plazos
                 const installmentData: CreateInstallmentData = {
                     amount: data.amount,
@@ -59,7 +63,9 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                     due_date: data.transaction_date,
                 };
                 await createInstallment(installmentData);
-            } else {
+            } 
+            
+            if (data.expenseType === 'expense') {
                 // Crear gasto normal
                 const expenseData: CreateExpenseData = {
                     amount: data.amount,
@@ -77,6 +83,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 transaction_date: new Date().toISOString().split('T')[0],
                 expenseType: 'expense',
                 number_of_installments: 3,
+                payment_day: 1,
             });
             onSubmitSuccess?.();
         } catch (error) {
@@ -86,6 +93,55 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Expense type selector - Radio buttons */}
+            <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Tipo de gasto
+                </label>
+
+                {/* Normal expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeNormal"
+                        value="expense"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeNormal" className="text-sm text-gray-700 dark:text-gray-300">
+                        Gasto normal
+                    </label>
+                </div>
+
+                {/* Fixed expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeFixed"
+                        value="fixed"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeFixed" className="text-sm text-gray-700 dark:text-gray-300">
+                        Gasto fijo (se repite cada mes)
+                    </label>
+                </div>
+
+                {/* Installment expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeInstallment"
+                        value="installment"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeInstallment" className="text-sm text-gray-700 dark:text-gray-300">
+                        Pago a cuotas (MSI)
+                    </label>
+                </div>
+            </div>
+
             {/* Amount */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -145,66 +201,36 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 <input type="hidden" {...register('category')} />
             </div>
 
-            {/* Date */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Fecha
-                </label>
-                <input
-                    type="date"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                    {...register('transaction_date')}
-                />
-            </div>
-
-            {/* Expense type selector - Radio buttons */}
-            <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Tipo de gasto
-                </label>
-
-                {/* Normal expense */}
-                <div className="flex items-center gap-3">
-                    <input
-                        type="radio"
-                        id="typeNormal"
-                        value="normal"
-                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
-                        {...register('expenseType')}
-                    />
-                    <label htmlFor="typeNormal" className="text-sm text-gray-700 dark:text-gray-300">
-                        Gasto normal
+            {/* Date - only for expense and installment */}
+            {(expenseType === 'expense' || expenseType === 'installment') && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {expenseType === 'installment' ? 'Fecha de pago' : 'Fecha'}
                     </label>
-                </div>
-
-                {/* Fixed expense */}
-                <div className="flex items-center gap-3">
                     <input
-                        type="radio"
-                        id="typeFixed"
-                        value="fixed"
-                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
-                        {...register('expenseType')}
+                        type="date"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                        {...register('transaction_date')}
                     />
-                    <label htmlFor="typeFixed" className="text-sm text-gray-700 dark:text-gray-300">
-                        Gasto fijo (se repite cada mes)
-                    </label>
                 </div>
+            )}
 
-                {/* Installment expense */}
-                <div className="flex items-center gap-3">
-                    <input
-                        type="radio"
-                        id="typeInstallment"
-                        value="installment"
-                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
-                        {...register('expenseType')}
-                    />
-                    <label htmlFor="typeInstallment" className="text-sm text-gray-700 dark:text-gray-300">
-                        Pago a cuotas (MSI)
+            {/* Payment day - only for fixed expenses */}
+            {expenseType === 'fixed' && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Día de pago
                     </label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="31"
+                        placeholder="Ej: 15"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                        {...register('payment_day', { valueAsNumber: true })}
+                    />
                 </div>
-            </div>
+            )}
 
             {/* Installments count - only for installment expenses */}
             {expenseType === 'installment' && (

@@ -11,7 +11,11 @@ interface DayEvent {
     date: string;
 }
 
-export default function Calendar() {
+interface CalendarProps {
+    onMonthYearChange?: (month: number, year: number) => void;
+}
+
+export default function Calendar({ onMonthYearChange }: CalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [events, setEvents] = useState<DayEvent[]>([]);
@@ -60,7 +64,10 @@ export default function Calendar() {
         };
 
         fetchEvents();
-    }, [currentMonth, currentYear]);
+        
+        // Notificar al componente padre cuando cambien mes/año
+        onMonthYearChange?.(currentMonth, currentYear);
+    }, [currentMonth, currentYear, onMonthYearChange]);
 
     const monthName = new Date(currentYear, currentMonth, 1).toLocaleString('es-ES', {
         month: 'long',

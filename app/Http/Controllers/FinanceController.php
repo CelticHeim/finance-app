@@ -3,13 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Fixed;
-use App\Models\Installment;
 use App\Models\Transaction;
+use App\Services\FinanceService;
 use Illuminate\Http\Request;
 
 class FinanceController extends Controller {
-    public function index(Request $request) {
+    protected FinanceService $financeService;
+
+    public function __construct(FinanceService $financeService) {
+        $this->financeService = $financeService;
+    }
+
+    public function index() {
+        $now = now();
+
+        $transactions = Transaction::with('transactionable')
+            ->byMonthAndYear($now->month, $now->year)
+            ->orderByDesc('transaction_date')
+            ->get();
+        $summary = $this->financeService->getSummary($now->month, $now->year);
+
+        $fixeds = $this->financeService->getFixeds();
+        $installments = $this->financeService->getInstallments();
+
+        return response()->json([
+            'message' => 'Resumen financiero y transacciones del mes actual',
+            'data' => [
+                'transactions' => $transactions,
+                'summary' => $summary,
+                'fixeds' => $fixeds,
+                'installments' => $installments,
+            ],
+        ]);
+    }
+
+    public function getTransactions(Request $request) {
         $month = $request->query('month');
         $year = $request->query('year');
         $limit = $request->query('limit', 10);
@@ -31,48 +59,38 @@ class FinanceController extends Controller {
         $month = $request->query('month', now()->month);
         $year = $request->query('year', now()->year);
 
-        // Calcular totales globales
-        $summary = Transaction::selectRaw(
-            'SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) as totalIncome,
-             SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) as totalExpenses'
-        )->first();
-
-        // Calcular ingresos y deudas del mes actual
-        $monthSummary = Transaction::selectRaw(
-            'SUM(CASE WHEN type = "income" AND YEAR(transaction_date) = ? AND MONTH(transaction_date) = ? THEN amount ELSE 0 END) as currentMonthIncome,
-             SUM(CASE WHEN (type = "expense" OR type = "installment") AND YEAR(transaction_date) = ? AND MONTH(transaction_date) = ? THEN amount ELSE 0 END) as transactionDebt',
-            [$year, $month, $year, $month]
-        )->first();
-
-        // Sumar montos de gastos fijos (se repiten cada mes)
-        $fixedDebt = Fixed::sum('amount') ?? 0;
-
-        // Calcular deuda total del mes (expenses + installments + fixed)
-        $currentMonthDebt = ($monthSummary->transactionDebt ?? 0) + $fixedDebt;
-
-        $availableBalance = $summary->totalIncome - $summary->totalExpenses;
+        $summaryData = $this->financeService->getSummary($month, $year);
 
         return response()->json([
             'message' => 'Resumen financiero',
-            'data' => [
-                'available_balance' => $availableBalance,
-                'total_debt' => $summary->totalExpenses,
-                'current_month_income' => $monthSummary->currentMonthIncome,
-                'current_month_debt' => $currentMonthDebt,
-            ],
+            'data' => $summaryData,
         ]);
     }
 
-    public function getDebts() {
-        $fixeds = Fixed::all();
-        $installments = Installment::where('status', 'pending')->get();
+    // public function getDebts() {
+    //     $debtsData = $this->financeService->getDebts();
+
+    //     return response()->json([
+    //         'message' => 'Lista de deudas (gastos fijos y cuotas)',
+    //         'data' => $debtsData,
+    //     ]);
+    // }
+
+    public function getFixeds() {
+        $fixeds = $this->financeService->getFixeds();
 
         return response()->json([
-            'message' => 'Lista de deudas (gastos fijos y cuotas)',
-            'data' => [
-                'fixeds' => $fixeds,
-                'installments' => $installments,
-            ],
+            'message' => 'Lista de gastos fijos',
+            'data' => $fixeds,
+        ]);
+    }
+
+    public function getInstallments() {
+        $installments = $this->financeService->getInstallments();
+
+        return response()->json([
+            'message' => 'Lista de cuotas pendientes',
+            'data' => $installments,
         ]);
     }
 }

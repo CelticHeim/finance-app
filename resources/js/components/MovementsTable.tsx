@@ -1,6 +1,6 @@
 import { TransactionRecord } from '@/types/transactions.type';
 import { useState, useEffect } from 'react';
-import { getFinances } from '../api/finances.api';
+import { getTransactions } from '../api/finances.api';
 import MultiSelect from './ui/MultiSelect';
 
 interface MovementsTableProps {
@@ -49,9 +49,11 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
         const fetchMovements = async () => {
             try {
                 const typesString = selectedTypes.length > 0 ? selectedTypes.join(',') : 'income,expense';
-                const response = await getFinances(1, 100, { types: typesString });
+                const response = await getTransactions(1, 100, { types: typesString });
+                console.log(response);
                 
-                if (response?.data.data) {
+                
+                if (response?.data) {
                     setMovements(response.data.data);
                 }
             } catch (error) {

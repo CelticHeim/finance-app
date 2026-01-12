@@ -5,9 +5,11 @@ import BalanceIndicator from '../components/BalanceIndicator';
 import MovementsTable from '../components/MovementsTable';
 import InstallmentTable from '../components/InstallmentTable';
 import FixedTable from '../components/FixedTable';
-import { getDebts } from '../api/finances.api';
+import { getFinances, getTransactions } from '../api/finances.api';
 import type { InstallmentRecord } from '../types/installments.type';
 import type { FixedRecord } from '../types/fixeds.type';
+import type { TransactionRecord } from '../types/transactions.type';
+import type { SummaryData } from '../types/finances.types';
 
 export default function Home() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
@@ -16,26 +18,29 @@ export default function Home() {
     
     const [installments, setInstallments] = useState<InstallmentRecord[]>([]);
     const [fixeds, setFixeds] = useState<FixedRecord[]>([]);
+    const [summary, setSummary] = useState<SummaryData | null>(null);
+    const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    // Función para refrescar los datos de debts
-    const refetchDebts = async () => {
+    // Cargar datos completos desde /finances
+    const refetchFinances = async () => {
         try {
-            const debtsResponse = await getDebts();
+            const financeResponse = await getFinances();
 
-            // Procesar datos de deudas (fixeds e installments)
-            if (debtsResponse?.data) {
-                setFixeds(debtsResponse.data.fixeds as FixedRecord[]);
-                setInstallments(debtsResponse.data.installments as InstallmentRecord[]);
+            if (financeResponse?.data) {
+                setFixeds(financeResponse.data.fixeds as FixedRecord[]);
+                setInstallments(financeResponse.data.installments as InstallmentRecord[]);
+                setSummary(financeResponse.data.summary as SummaryData);
+                setTransactions(financeResponse.data.transactions as TransactionRecord[]);
             }
         } catch (error) {
-            console.error('Error fetching debts:', error);
+            console.error('Error fetching finances:', error);
         }
     };
 
-    // Cargar datos de debts al montar el componente
+    // Cargar datos al montar el componente
     useEffect(() => {
-        refetchDebts();
+        refetchFinances();
     }, []);
 
     return (
@@ -46,14 +51,14 @@ export default function Home() {
                 </h1>
 
                 {/* Balance Stats */}
-                <BalanceIndicator month={selectedMonth + 1} year={selectedYear} />
+                {summary && <BalanceIndicator summary={summary} />}
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
                     {/* Left side - Registro Form */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
                             <RegistroForm onDataUpdated={() => {
-                                refetchDebts();
+                                refetchFinances();
                                 setRefreshTrigger(prev => prev + 1);
                             }} />
                         </div>
@@ -63,6 +68,7 @@ export default function Home() {
                     <div className="lg:col-span-4">
                         <Calendar 
                             fixeds={fixeds}
+                            transactions={transactions}
                             onMonthYearChange={(month, year) => {
                                 setSelectedMonth(month);
                                 setSelectedYear(year);
@@ -124,3 +130,4 @@ export default function Home() {
         </div>
     );
 }
+

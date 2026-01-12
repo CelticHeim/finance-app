@@ -1,37 +1,45 @@
 import { PaginatedResponse } from "./common.type";
 import { TransactionRecord } from "./transactions.type";
+import { FixedRecord } from "./fixeds.type";
+import { InstallmentRecord } from "./installments.type";
 
-export type FinanceResponse = PaginatedResponse<TransactionRecord>;
+// Resumen del mes actual
+export type SummaryData = {
+    available_balance: number;
+    total_debt: number;
+    current_month_income: number;
+    current_month_debt: number;
+};
 
+// Respuesta del endpoint /finances (endpoint raíz)
+export type FinanceIndexResponse = {
+    message: string;
+    data: {
+        transactions: TransactionRecord[];
+        summary: SummaryData;
+        fixeds: FixedRecord[];
+        installments: InstallmentRecord[];
+    };
+};
+
+// Respuesta del endpoint /finances/transactions
+export type TransactionsResponse = PaginatedResponse<TransactionRecord>;
+
+// Respuesta del endpoint /finances/summary
 export type SummaryResponse = {
     message: string;
-    data: {
-        available_balance: number;
-        total_debt: number;
-        current_month_income: number;
-        current_month_debt: number;
-    };
+    data: SummaryData;
 };
 
-export type DebtsResponse = {
+// Respuesta del endpoint /finances/fixeds
+export type FixedsResponse = {
     message: string;
-    data: {
-        fixeds: Array<{
-            id: number;
-            amount: string;
-            category: string;
-            description: string | null;
-            due_date: string;
-            created_at: string;
-        }>;
-        installments: Array<{
-            id: number;
-            amount: string;
-            number_of_installments: number;
-            current_installment: number;
-            due_date: string;
-            status: 'pending' | 'paid' | 'overdue';
-            created_at: string;
-        }>;
-    };
+    data: FixedRecord[];
 };
+
+// Respuesta del endpoint /finances/installments
+export type InstallmentsResponse = {
+    message: string;
+    data: InstallmentRecord[];
+};
+

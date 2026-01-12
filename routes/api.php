@@ -13,9 +13,14 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
-Route::get('/finances', [FinanceController::class, 'index']);
-Route::get('/finances/summary', [FinanceController::class, 'getSummary']);
-Route::get('/finances/debts', [FinanceController::class, 'getDebts']);
+Route::prefix('finances')->controller(FinanceController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/transactions', 'getTransactions');
+    Route::get('/summary', 'getSummary');
+    // Route::get('/debts', 'getDebts');
+    Route::get('/fixeds', 'getFixeds');
+    Route::get('/installments', 'getInstallments');
+});
 
 Route::apiResource('incomes', IncomeController::class);
 Route::apiResource('expenses', ExpenseController::class);

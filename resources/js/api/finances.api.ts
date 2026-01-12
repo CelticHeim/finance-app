@@ -1,13 +1,30 @@
 import api from "@/lib/axios";
-import type { FinanceResponse, SummaryResponse, DebtsResponse } from "@/types/finances.types";
+import type { 
+    FinanceIndexResponse, 
+    TransactionsResponse, 
+    SummaryResponse, 
+    FixedsResponse,
+    InstallmentsResponse
+} from "@/types/finances.types";
 
-export const getFinances = async (
+// Obtiene el resumen completo del mes actual (transacciones, resumen, fixeds, installments)
+export const getFinances = async (): Promise<FinanceIndexResponse | undefined> => {
+    try {
+        const { data } = await api.get('/finances');
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+// Obtiene transacciones paginadas con filtros
+export const getTransactions = async (
     page: number = 1,
     limit: number = 10,
     filters?: { month?: number; year?: number; types?: string }
-): Promise<FinanceResponse | undefined> => {
+): Promise<TransactionsResponse | undefined> => {
     try {
-        const { data } = await api.get('/finances', {
+        const { data } = await api.get('/finances/transactions', {
             params: {
                 page,
                 limit,
@@ -22,6 +39,7 @@ export const getFinances = async (
     }
 };
 
+// Obtiene el resumen financiero del mes
 export const getSummary = async (
     month?: number,
     year?: number
@@ -39,17 +57,20 @@ export const getSummary = async (
     }
 };
 
-export const getDebts = async (
-    month?: number,
-    year?: number
-): Promise<DebtsResponse | undefined> => {
+// Obtiene los gastos fijos
+export const getFixeds = async (): Promise<FixedsResponse | undefined> => {
     try {
-        const { data } = await api.get('/finances/debts', {
-            params: {
-                ...(month && { month }),
-                ...(year && { year }),
-            },
-        });
+        const { data } = await api.get('/finances/fixeds');
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+// Obtiene las cuotas pendientes
+export const getInstallments = async (): Promise<InstallmentsResponse | undefined> => {
+    try {
+        const { data } = await api.get('/finances/installments');
         return data;
     } catch (error) {
         console.error(error);

@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { useFinance } from '../contexts/FinanceContext';
+
 interface Installment {
     id: string;
     amount: number;
@@ -7,12 +10,22 @@ interface Installment {
     status: 'pending' | 'paid' | 'overdue';
 }
 
-interface InstallmentTableProps {
-    installments?: Installment[];
-}
+export default function InstallmentTable() {
+    const { installments, subscribe, loadInstallmentsIfNeeded } = useFinance();
 
-export default function InstallmentTable({ installments }: InstallmentTableProps) {
-    const dataToShow = installments || [];
+    // Cargar datos cuando el componente se monta (si no están en cache)
+    useEffect(() => {
+        loadInstallmentsIfNeeded();
+    }, [loadInstallmentsIfNeeded]);
+
+    // Recargar cuando se recibe evento de 'installment-added'
+    useEffect(() => {
+        const unsubscribe = subscribe('installment-added', () => {
+            loadInstallmentsIfNeeded();
+        });
+
+        return unsubscribe;
+    }, [subscribe, loadInstallmentsIfNeeded]);
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -80,8 +93,8 @@ export default function InstallmentTable({ installments }: InstallmentTableProps
                         </tr>
                     </thead>
                     <tbody>
-                        {dataToShow.length > 0 ? (
-                            dataToShow.map((installment) => (
+                        {installments.length > 0 ? (
+                            installments.map((installment) => (
                                 <tr
                                     key={installment.id}
                                     className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${

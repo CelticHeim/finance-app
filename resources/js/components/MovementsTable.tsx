@@ -1,6 +1,7 @@
 import { TransactionRecord } from '@/types/transactions.type';
 import { useState, useEffect } from 'react';
 import { getTransactions } from '../api/finances.api';
+import { useFinance } from '../contexts/FinanceContext';
 import MultiSelect from './ui/MultiSelect';
 
 interface MovementsTableProps {
@@ -8,7 +9,9 @@ interface MovementsTableProps {
 }
 
 export default function MovementsTable({ refreshTrigger = 0 }: MovementsTableProps) {
+    const { subscribe } = useFinance();
     const [movements, setMovements] = useState<TransactionRecord[]>([]);
+    const [reloadTrigger, setReloadTrigger] = useState(0);
     // Mapeo de tipos a nombres en español
     const typeLabels: Record<string, string> = {
         'income': 'Ingresos',
@@ -44,7 +47,16 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
     const [filterDateFrom, setFilterDateFrom] = useState(monthRange.from);
     const [filterDateTo, setFilterDateTo] = useState(monthRange.to);
 
-    // Cargar datos de la API cuando cambien los tipos seleccionados o cuando se reciba un refresh trigger
+    // Suscribirse al evento 'transaction-added' para recargar datos
+    useEffect(() => {
+        const unsubscribe = subscribe('transaction-added', () => {
+            setReloadTrigger(prev => prev + 1);
+        });
+
+        return unsubscribe;
+    }, [subscribe]);
+
+    // Cargar datos de la API cuando cambien los tipos seleccionados o cuando se reciba un evento de recarga
     useEffect(() => {
         const fetchMovements = async () => {
             try {
@@ -62,7 +74,7 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
         };
 
         fetchMovements();
-    }, [selectedTypes, refreshTrigger]);
+    }, [selectedTypes, reloadTrigger]);
 
     // Filter data based on filters
     const filteredData = (movements || []).filter((movement) => {

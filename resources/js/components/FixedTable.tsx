@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { useFinance } from '../contexts/FinanceContext';
+
 interface Fixed {
     id: string;
     amount: number;
@@ -6,12 +9,22 @@ interface Fixed {
     day_of_month: number;
 }
 
-interface FixedTableProps {
-    fixeds?: Fixed[];
-}
+export default function FixedTable() {
+    const { fixeds, subscribe, loadFixedsIfNeeded } = useFinance();
 
-export default function FixedTable({ fixeds }: FixedTableProps) {
-    const dataToShow = fixeds || [];
+    // Cargar datos cuando el componente se monta (si no están en cache)
+    useEffect(() => {
+        loadFixedsIfNeeded();
+    }, [loadFixedsIfNeeded]);
+
+    // Recargar cuando se recibe evento de 'fixed-added'
+    useEffect(() => {
+        const unsubscribe = subscribe('fixed-added', () => {
+            loadFixedsIfNeeded();
+        });
+
+        return unsubscribe;
+    }, [subscribe, loadFixedsIfNeeded]);
 
     const getCategoryColor = (category: string): string => {
         const colors: { [key: string]: string } = {
@@ -50,8 +63,8 @@ export default function FixedTable({ fixeds }: FixedTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {dataToShow.length > 0 ? (
-                            dataToShow.map((fixed) => (
+                        {fixeds.length > 0 ? (
+                            fixeds.map((fixed) => (
                                 <tr
                                     key={fixed.id}
                                     className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
-import { getFinances, getCalendarData } from '../api/finances.api';
+import { getFinances, getCalendarData, getFixeds, getInstallments } from '../api/finances.api';
 import type { SummaryData } from '../types/finances.types';
 import type { FixedRecord } from '../types/fixeds.type';
 import type { InstallmentRecord } from '../types/installments.type';
@@ -29,6 +29,10 @@ interface FinanceContextType {
     loadInitialData: () => Promise<void>;
     setMonth: (month: number, year: number) => Promise<void>;
     
+    // Funciones para cacheo de datos (FixedTable + InstallmentTable)
+    loadFixedsIfNeeded: () => Promise<void>;
+    loadInstallmentsIfNeeded: () => Promise<void>;
+    
     // Sistema de eventos (otros componentes se suscriben)
     subscribe: (event: FinanceEvent, callback: EventCallback) => () => void;
     notifyTransactionAdded: () => void;
@@ -48,6 +52,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(false);
+
+    // Estados de cacheo (para evitar recargas innecesarias)
+    const [fixedsLoaded, setFixedsLoaded] = useState(false);
+    const [installmentsLoaded, setInstallmentsLoaded] = useState(false);
 
     // Sistema de eventos (pub-sub pattern)
     const subscribers = useRef<Map<FinanceEvent, Set<EventCallback>>>(new Map());
@@ -119,6 +127,41 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         }
     }, [emit]);
 
+    // Funciones para cargar datos con cacheo
+    const loadFixedsIfNeeded = useCallback(async () => {
+        // Si ya están cargados, no hacer nada
+        if (fixedsLoaded) {
+            return;
+        }
+
+        try {
+            const response = await getFixeds();
+            if (response?.data) {
+                setFixeds(response.data);
+                setFixedsLoaded(true);
+            }
+        } catch (error) {
+            console.error('Error loading fixeds:', error);
+        }
+    }, [fixedsLoaded]);
+
+    const loadInstallmentsIfNeeded = useCallback(async () => {
+        // Si ya están cargados, no hacer nada
+        if (installmentsLoaded) {
+            return;
+        }
+
+        try {
+            const response = await getInstallments();
+            if (response?.data) {
+                setInstallments(response.data);
+                setInstallmentsLoaded(true);
+            }
+        } catch (error) {
+            console.error('Error loading installments:', error);
+        }
+    }, [installmentsLoaded]);
+
     // Notificar que se agregó una transacción (income/expense)
     // Los componentes escuchan este evento y hacen su propia recarga
     const notifyTransactionAdded = useCallback(() => {
@@ -126,12 +169,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }, [emit]);
 
     // Notificar que se agregó un fixed
+    // Invalidar cache de fixeds para que se recarguen
     const notifyFixedAdded = useCallback(() => {
+        setFixedsLoaded(false);  // Invalidar cache
         emit('fixed-added');
     }, [emit]);
 
     // Notificar que se agregó un installment
+    // Invalidar cache de installments para que se recarguen
     const notifyInstallmentAdded = useCallback(() => {
+        setInstallmentsLoaded(false);  // Invalidar cache
         emit('installment-added');
     }, [emit]);
 
@@ -148,6 +195,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         // Acciones (Calendar + BalanceIndicator)
         loadInitialData,
         setMonth,
+
+        // Funciones de cacheo (FixedTable + InstallmentTable)
+        loadFixedsIfNeeded,
+        loadInstallmentsIfNeeded,
         
         // Notificaciones
         notifyTransactionAdded,

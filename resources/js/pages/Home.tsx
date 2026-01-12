@@ -9,16 +9,9 @@ import { FinanceProvider, useFinance } from '../contexts/FinanceContext';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
     
     // Obtener datos y funciones del contexto
     const {
-        summary,
-        transactions,
-        fixeds,
-        installments,
-        currentMonth,
-        currentYear,
         loadInitialData,
         notifyTransactionAdded,
         notifyFixedAdded,
@@ -45,9 +38,7 @@ function HomeContent() {
                         <div className="sticky top-6">
                             <RegistroForm onDataUpdated={() => {
                                 // Notificar según el tipo de registro agregado
-                                // Por ahora, notificamos transacción genérica
                                 notifyTransactionAdded();
-                                setRefreshTrigger(prev => prev + 1);
                             }} />
                         </div>
                     </div>
@@ -103,9 +94,11 @@ function HomeContent() {
                 </div>
 
                 {/* Tables */}
-                {tableView === 'movements' && <MovementsTable refreshTrigger={refreshTrigger} />}
-                {tableView === 'fixeds' && <FixedTable fixeds={fixeds as unknown as any} />}
-                {tableView === 'installments' && <InstallmentTable installments={installments as unknown as any} />}
+                <div className={tableView === 'movements' ? 'block' : 'hidden'}>
+                    <MovementsTable />
+                </div>
+                {tableView === 'fixeds' && <FixedTable />}
+                {tableView === 'installments' && <InstallmentTable />}
             </div>
         </div>
     );

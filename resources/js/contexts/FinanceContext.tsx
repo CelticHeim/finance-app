@@ -87,6 +87,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         try {
             // Cargar fixeds e installments
             const financeResponse = await getFinances();
+            console.log(financeResponse);
+            
             if (financeResponse?.data) {
                 setFixeds(financeResponse.data.fixeds);
                 setInstallments(financeResponse.data.installments);

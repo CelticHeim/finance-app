@@ -15,13 +15,13 @@ interface DayEvent {
 }
 
 export default function Calendar() {
-    const { 
-        currentMonth, 
-        currentYear, 
+    const {
+        currentMonth,
+        currentYear,
         transactions,
-        setMonth 
+        setMonth
     } = useFinance();
-    
+
     const [events, setEvents] = useState<DayEvent[]>([]);
 
     // Procesar eventos desde contexto
@@ -41,7 +41,7 @@ export default function Calendar() {
                 color: colorMap[record.type as keyof typeof colorMap] || '#EF4444',
                 type: record.type,
                 date: record.transaction_date?.split('T')[0] || record.transaction_date,
-                isPaid: record.status === 'paid',
+                isPaid: record.status === 'completed',
                 fixedId: record.type === 'fixed' ? record.id : undefined,
             };
         });
@@ -70,24 +70,24 @@ export default function Calendar() {
     const handlePrevMonth = async () => {
         let newMonth = currentMonth - 1;
         let newYear = currentYear;
-        
+
         if (newMonth < 0) {
             newMonth = 11;
             newYear--;
         }
-        
+
         await setMonth(newMonth, newYear);
     };
 
     const handleNextMonth = async () => {
         let newMonth = currentMonth + 1;
         let newYear = currentYear;
-        
+
         if (newMonth > 11) {
             newMonth = 0;
             newYear++;
         }
-        
+
         await setMonth(newMonth, newYear);
     };
 

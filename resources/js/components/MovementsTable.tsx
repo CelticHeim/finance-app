@@ -62,8 +62,6 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
             try {
                 const typesString = selectedTypes.length > 0 ? selectedTypes.join(',') : 'income,expense';
                 const response = await getTransactions(1, 100, { types: typesString });
-                console.log(response);
-                
                 
                 if (response?.data) {
                     setMovements(response.data.data);

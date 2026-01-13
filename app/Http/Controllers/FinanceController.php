@@ -21,6 +21,7 @@ class FinanceController extends Controller {
         $calendarData = $this->financeService->getCalendarTransactions($now->month, $now->year);
         $summary = $this->financeService->getSummary($now->month, $now->year);
         $installments = $this->financeService->getInstallments();
+        $fixeds = $this->financeService->getFixeds();
 
         return response()->json([
             'message' => 'Resumen financiero y transacciones del mes actual',
@@ -28,6 +29,7 @@ class FinanceController extends Controller {
                 'transactions' => $calendarData,
                 'summary' => $summary,
                 'installments' => $installments,
+                'fixeds' => $fixeds,
             ],
         ]);
     }

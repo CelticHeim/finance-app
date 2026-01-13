@@ -1,14 +1,6 @@
 import { useEffect } from 'react';
 import { useFinance } from '../contexts/FinanceContext';
 
-interface Fixed {
-    id: string;
-    amount: number;
-    category: string;
-    description?: string;
-    day_of_month: number;
-}
-
 export default function FixedTable() {
     const { fixeds, subscribe, loadFixedsIfNeeded } = useFinance();
 
@@ -36,6 +28,15 @@ export default function FixedTable() {
             otros: '#6B7280',
         };
         return colors[category.toLowerCase()] || '#6B7280';
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
     };
 
     return (
@@ -86,7 +87,7 @@ export default function FixedTable() {
                                         ${parseFloat(fixed.amount).toFixed(2)}
                                     </td>
                                     <td className="py-4 px-4 text-center text-gray-600 dark:text-gray-400 font-medium">
-                                        {fixed.day_of_month}
+                                        {formatDate(fixed.due_date)}
                                     </td>
                                 </tr>
                             ))

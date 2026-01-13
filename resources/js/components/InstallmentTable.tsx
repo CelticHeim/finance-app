@@ -1,15 +1,6 @@
 import { useEffect } from 'react';
 import { useFinance } from '../contexts/FinanceContext';
 
-interface Installment {
-    id: string;
-    amount: number;
-    number_of_installments: number;
-    current_installment: number;
-    due_date: string;
-    status: 'pending' | 'paid' | 'overdue';
-}
-
 export default function InstallmentTable() {
     const { installments, subscribe, loadInstallmentsIfNeeded } = useFinance();
 

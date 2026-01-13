@@ -1,4 +1,5 @@
 import CalendarEvent from './CalendarEvent';
+import type { TransactionRecord } from '../../types/transactions.type';
 
 interface DayEvent {
     id: string;
@@ -9,6 +10,7 @@ interface DayEvent {
     date: string;
     isPaid?: boolean;
     fixedId?: number;
+    transactionData?: TransactionRecord;
 }
 
 interface CalendarDayProps {
@@ -17,9 +19,10 @@ interface CalendarDayProps {
     isToday: boolean;
     events: DayEvent[];
     onClick?: () => void;
+    onEventClick?: (transaction: TransactionRecord) => void;
 }
 
-export default function CalendarDay({ day, isCurrentMonth, isToday, events, onClick }: CalendarDayProps) {
+export default function CalendarDay({ day, isCurrentMonth, isToday, events, onClick, onEventClick }: CalendarDayProps) {
     if (day === null) {
         return <div className="min-h-24 bg-gray-50 dark:bg-gray-900"></div>;
     }
@@ -55,6 +58,11 @@ export default function CalendarDay({ day, isCurrentMonth, isToday, events, onCl
                         color={event.color}
                         type={event.type}
                         isPaid={event.isPaid}
+                        onClick={() => {
+                            if (event.transactionData && onEventClick) {
+                                onEventClick(event.transactionData);
+                            }
+                        }}
                     />
                 ))}
                 {events.length === 0 && isCurrentMonth && (

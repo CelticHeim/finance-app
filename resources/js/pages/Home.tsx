@@ -5,6 +5,7 @@ import BalanceIndicator from '../components/BalanceIndicator';
 import MovementsTable from '../components/MovementsTable';
 import InstallmentTable from '../components/InstallmentTable';
 import FixedTable from '../components/FixedTable';
+import TransactionDetails from '../components/TransactionDetails';
 import { FinanceProvider, useFinance } from '../contexts/FinanceContext';
 
 function HomeContent() {
@@ -25,6 +26,8 @@ function HomeContent() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+            <TransactionDetails />
+
             <div className="w-full">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
                     Mis Finanzas

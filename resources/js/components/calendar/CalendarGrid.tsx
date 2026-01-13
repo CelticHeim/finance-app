@@ -1,4 +1,5 @@
 import CalendarDay from './CalendarDay';
+import type { TransactionRecord } from '../../types/transactions.type';
 
 interface DayEvent {
     id: string;
@@ -9,15 +10,17 @@ interface DayEvent {
     date: string;
     isPaid?: boolean;
     fixedId?: number;
+    transactionData?: TransactionRecord;
 }
 
 interface CalendarGridProps {
     month: number;
     year: number;
     events: Map<string, DayEvent[]>;
+    onEventClick?: (transaction: TransactionRecord) => void;
 }
 
-export default function CalendarGrid({ month, year, events }: CalendarGridProps) {
+export default function CalendarGrid({ month, year, events, onEventClick }: CalendarGridProps) {
     const today = new Date();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -85,6 +88,7 @@ export default function CalendarGrid({ month, year, events }: CalendarGridProps)
                         isCurrentMonth={day !== null}
                         isToday={isToday(day)}
                         events={getEventsForDay(day)}
+                        onEventClick={onEventClick}
                         onClick={() => {
                             if (day !== null) {
                                 console.log(`Clicked on ${month + 1}/${day}/${year}`);

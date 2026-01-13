@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import CalendarGrid from './CalendarGrid';
 import { useFinance } from '../../contexts/FinanceContext';
+import type { TransactionRecord } from '../../types/transactions.type';
 
 interface DayEvent {
     id: string;
@@ -12,6 +13,7 @@ interface DayEvent {
     date: string;
     isPaid?: boolean;
     fixedId?: number;
+    transactionData?: TransactionRecord;
 }
 
 export default function Calendar() {
@@ -19,7 +21,8 @@ export default function Calendar() {
         currentMonth,
         currentYear,
         transactions,
-        setMonth
+        setMonth,
+        selectTransaction
     } = useFinance();
 
     const [events, setEvents] = useState<DayEvent[]>([]);
@@ -43,6 +46,7 @@ export default function Calendar() {
                 date: record.transaction_date?.split('T')[0] || record.transaction_date,
                 isPaid: record.status === 'completed',
                 fixedId: record.type === 'fixed' ? record.id : undefined,
+                transactionData: record,
             };
         });
 
@@ -126,7 +130,7 @@ export default function Calendar() {
             </div>
 
             {/* Calendar Grid */}
-            <CalendarGrid month={currentMonth} year={currentYear} events={eventsMap} />
+            <CalendarGrid month={currentMonth} year={currentYear} events={eventsMap} onEventClick={selectTransaction} />
         </div>
     );
 }

@@ -67,10 +67,10 @@ function ModalContent({ isOpen, onOpenChange, children }: ModalProps) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in"
             onClick={handleBackdropClick}
         >
-            <div className="relative w-full max-w-md rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            <div className="relative w-full max-w-md rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 animate-zoom-in">
                 {children}
             </div>
         </div>

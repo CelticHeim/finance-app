@@ -207,6 +207,9 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                             <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
                                 Fecha
                             </th>
+                            <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                Estado
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -270,6 +273,15 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                         {formatDate(movement.transaction_date.split('T')[0])}
                                     </div>
                                 </td>
+                                <td className="py-4 px-4">
+                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                        movement.status === 'completed'
+                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                            : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                    }`}>
+                                        {movement.status === 'completed' ? 'Completado' : 'Pendiente'}
+                                    </span>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -283,47 +295,6 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                     </p>
                 </div>
             )}
-
-            {/* Summary */}
-            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                    <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                        Total Ingresos
-                    </p>
-                    <p className="text-2xl font-bold text-green-900 dark:text-green-300 mt-2">
-                        ${dataToShow
-                            .filter((m) => m.type === 'income')
-                            .reduce((sum, m) => sum + m.amount, 0)
-                            .toFixed(2)}
-                    </p>
-                </div>
-                <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                    <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                        Total Gastos
-                    </p>
-                    <p className="text-2xl font-bold text-red-900 dark:text-red-300 mt-2">
-                        ${dataToShow
-                            .filter((m) => m.type === 'expense')
-                            .reduce((sum, m) => sum + m.amount, 0)
-                            .toFixed(2)}
-                    </p>
-                </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                        Balance Neto
-                    </p>
-                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-300 mt-2">
-                        ${(
-                            dataToShow
-                                .filter((m) => m.type === 'income')
-                                .reduce((sum, m) => sum + m.amount, 0) -
-                            dataToShow
-                                .filter((m) => m.type === 'expense')
-                                .reduce((sum, m) => sum + m.amount, 0)
-                        ).toFixed(2)}
-                    </p>
-                </div>
-            </div> */}
         </div>
     );
 }

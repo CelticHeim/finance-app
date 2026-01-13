@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Modal } from './ui/Modal';
+import AlertDialog from './ui/AlertDialog';
 import { useFinance } from '../contexts/FinanceContext';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useFinance();
     const transaction = selectedTransaction;
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     if (!transaction) return null;
 
@@ -35,92 +38,121 @@ export default function TransactionDetails() {
     };
 
     return (
-        <Modal isOpen={!!transaction} onOpenChange={(open) => {
-            if (!open) selectTransaction(null);
-        }}>
-            <div className={`${colors.headerBg} border ${colors.headerBorder} px-6 py-4 rounded-t-lg`}>
-                <h2 className={`text-xl font-bold ${colors.headerText}`}>
-                    Detalles de Transacción
-                </h2>
-            </div>
-
-            <div className="px-6 py-4">
-                {/* Type Badge */}
-                <div className="mb-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${colors.badge} ${colors.text}`}>
-                        {typeLabels[transaction.type]}
-                    </span>
+        <>
+            <Modal isOpen={!!transaction} onOpenChange={(open) => {
+                if (!open) selectTransaction(null);
+            }}>
+                <div className={`${colors.headerBg} border ${colors.headerBorder} px-6 py-4 rounded-t-lg`}>
+                    <h2 className={`text-xl font-bold ${colors.headerText}`}>
+                        Detalles de Transacción
+                    </h2>
                 </div>
 
-                {/* Description */}
-                <div className="mb-4">
-                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Descripción
-                    </label>
-                    <p className="text-lg font-medium text-gray-900 dark:text-white">
-                        {transaction.description || 'Sin descripción'}
-                    </p>
-                </div>
+                <div className="px-6 py-4">
+                    {/* Type Badge */}
+                    <div className="mb-4">
+                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${colors.badge} ${colors.text}`}>
+                            {typeLabels[transaction.type]}
+                        </span>
+                    </div>
 
-                {/* Category */}
-                <div className="mb-4">
-                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Categoría
-                    </label>
-                    <p className="text-gray-900 dark:text-gray-200">
-                        {transaction.category}
-                    </p>
-                </div>
-
-                {/* Amount */}
-                <div className="mb-4">
-                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Monto
-                    </label>
-                    <p className={`text-3xl font-bold ${
-                        transaction.type === 'income'
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-red-600 dark:text-red-400'
-                    }`}>
-                        {transaction.type === 'income' ? '+' : '-'} ${parseFloat(transaction.amount).toFixed(2)}
-                    </p>
-                </div>
-
-                {/* Date */}
-                <div className="mb-4">
-                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Fecha
-                    </label>
-                    <p className="text-gray-900 dark:text-gray-200">
-                        {formatDate(transaction.transaction_date)}
-                    </p>
-                </div>
-
-                {/* Status */}
-                {transaction.status && (
+                    {/* Description */}
                     <div className="mb-4">
                         <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                            Estado
+                            Descripción
                         </label>
-                        <p className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                            transaction.status === 'completed'
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                        }`}>
-                            {transaction.status === 'completed' ? 'Completado' : 'Pendiente'}
+                        <p className="text-lg font-medium text-gray-900 dark:text-white">
+                            {transaction.description || 'Sin descripción'}
                         </p>
                     </div>
-                )}
-            </div>
 
-            <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-6 py-4 flex gap-2">
-                <button
-                    onClick={() => selectTransaction(null)}
-                    className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
-                >
-                    Cerrar
-                </button>
-            </div>
-        </Modal>
+                    {/* Category */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                            Categoría
+                        </label>
+                        <p className="text-gray-900 dark:text-gray-200">
+                            {transaction.category}
+                        </p>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                            Monto
+                        </label>
+                        <p className={`text-3xl font-bold ${transaction.type === 'income'
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>
+                            {transaction.type === 'income' ? '+' : '-'} ${parseFloat(transaction.amount).toFixed(2)}
+                        </p>
+                    </div>
+
+                    {/* Date */}
+                    <div className="mb-4">
+                        <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                            Fecha
+                        </label>
+                        <p className="text-gray-900 dark:text-gray-200">
+                            {formatDate(transaction.transaction_date)}
+                        </p>
+                    </div>
+
+                    {/* Status */}
+                    {transaction.status && (
+                        <div className="mb-4">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                                Estado
+                            </label>
+                            <div className="flex items-center justify-between gap-3">
+                                <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${transaction.status === 'completed'
+                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                    }`}>
+                                    {transaction.status === 'completed' ? 'Completado' : 'Pendiente'}
+                                </span>
+                                {(transaction.type === 'installment' || transaction.type === 'fixed') && transaction.status !== 'completed' && (
+                                    <button
+                                        onClick={() => setShowConfirmDialog(true)}
+                                        className="px-4 py-1 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                                    >
+                                        Marcar como Pagado
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-6 py-4 flex gap-2">
+                    <button
+                        onClick={() => selectTransaction(null)}
+                        className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                    >
+                        Cerrar
+                    </button>
+                </div>
+            </Modal>
+
+            <AlertDialog
+                isOpen={showConfirmDialog}
+                onOpenChange={setShowConfirmDialog}
+                title="Confirmar Pago"
+                onConfirm={() => {
+                    console.log('Pago confirmado para:', transaction?.id);
+                    // Aquí irá la lógica para marcar como pagado
+                }}
+                onCancel={() => setShowConfirmDialog(false)}
+                confirmText="Marcar como Pagado"
+                cancelText="Cancelar"
+            >
+                <p className="text-gray-700 dark:text-gray-300">
+                    ¿Deseas marcar como pagado el {transaction?.type === 'installment' ? 'pago a plazo' : 'gasto fijo'} de{' '}
+                    <span className="font-bold">{transaction?.description}</span> por{' '}
+                    <span className="font-bold text-green-600 dark:text-green-400">${parseFloat(transaction?.amount || '0').toFixed(2)}</span>?
+                </p>
+            </AlertDialog>
+        </>
     );
 }

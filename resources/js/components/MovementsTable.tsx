@@ -9,7 +9,7 @@ interface MovementsTableProps {
 }
 
 export default function MovementsTable({ refreshTrigger = 0 }: MovementsTableProps) {
-    const { subscribe, selectTransaction } = useFinance();
+    const { subscribe, selectTransaction, selectedTransaction } = useFinance();
     const [movements, setMovements] = useState<TransactionRecord[]>([]);
     const [reloadTrigger, setReloadTrigger] = useState(0);
     // Mapeo de tipos a nombres en español
@@ -214,10 +214,12 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                             <tr
                                 key={movement.id}
                                 onClick={() => selectTransaction(movement)}
-                                className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
-                                    index % 2 === 0
-                                        ? 'bg-white dark:bg-gray-800'
-                                        : 'bg-gray-50 dark:bg-gray-800/50'
+                                className={`border-b border-gray-200 dark:border-gray-700 transition-colors cursor-pointer ${
+                                    selectedTransaction?.id === movement.id
+                                        ? 'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                                        : index % 2 === 0
+                                        ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                        : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                             >
                                 <td className="py-4 px-4">

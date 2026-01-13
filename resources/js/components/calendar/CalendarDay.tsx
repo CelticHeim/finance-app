@@ -22,15 +22,14 @@ interface CalendarDayProps {
     onEventClick?: (transaction: TransactionRecord) => void;
 }
 
-export default function CalendarDay({ day, isCurrentMonth, isToday, events, onClick, onEventClick }: CalendarDayProps) {
+export default function CalendarDay({ day, isCurrentMonth, isToday, events, onEventClick }: CalendarDayProps) {
     if (day === null) {
         return <div className="min-h-24 bg-gray-50 dark:bg-gray-900"></div>;
     }
 
     return (
         <div
-            onClick={onClick}
-            className={`min-h-24 p-2 border border-gray-200 dark:border-gray-700 cursor-pointer transition-all ${
+            className={`min-h-24 p-2 border border-gray-200 dark:border-gray-700 transition-all ${
                 isToday
                     ? 'bg-blue-50 dark:bg-blue-900/20'
                     : isCurrentMonth

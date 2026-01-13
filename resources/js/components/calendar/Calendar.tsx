@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
 import CalendarGrid from './CalendarGrid';
 import { useFinance } from '../../contexts/FinanceContext';
 import type { TransactionRecord } from '../../types/transactions.type';

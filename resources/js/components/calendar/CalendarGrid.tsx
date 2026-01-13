@@ -24,11 +24,9 @@ export default function CalendarGrid({ month, year, events, onEventClick }: Cale
     const today = new Date();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const prevLastDay = new Date(year, month, 0);
 
     const startingDayOfWeek = firstDay.getDay();
     const daysInMonth = lastDay.getDate();
-    const daysInPrevMonth = prevLastDay.getDate();
 
     // Array para almacenar todas las celdas
     const calendar: (number | null)[] = [];

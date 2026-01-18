@@ -1,4 +1,4 @@
-import { useFinance } from '../contexts/FinanceContext';
+import { useFinance } from '@/contexts/FinanceContext';
 
 export default function BalanceIndicator() {
     const { summary } = useFinance();

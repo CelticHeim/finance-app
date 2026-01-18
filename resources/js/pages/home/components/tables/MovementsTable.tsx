@@ -1,8 +1,8 @@
 import { TransactionRecord } from '@/types/transactions.type';
 import { useState, useEffect } from 'react';
-import { getTransactions } from '../api/finances.api';
-import { useFinance } from '../contexts/FinanceContext';
-import MultiSelect from './ui/MultiSelect';
+import { getTransactions } from '@/api/finances.api';
+import { useFinance } from '@/contexts/FinanceContext';
+import MultiSelect from '@/components/ui/MultiSelect';
 
 interface MovementsTableProps {
     refreshTrigger?: number;
@@ -27,14 +27,14 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
         const now = new Date();
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        
+
         const formatDate = (date: Date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         };
-        
+
         return {
             from: formatDate(firstDay),
             to: formatDate(lastDay)
@@ -62,7 +62,7 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
             try {
                 const typesString = selectedTypes.length > 0 ? selectedTypes.join(',') : 'income,expense';
                 const response = await getTransactions(1, 100, { types: typesString });
-                
+
                 if (response?.data) {
                     setMovements(response.data.data);
                 }
@@ -78,10 +78,10 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
     const filteredData = (movements || []).filter((movement) => {
         if (selectedTypes.length > 0 && !selectedTypes.includes(movement.type)) return false;
         if (filterCategory !== 'all' && movement.category !== filterCategory) return false;
-        
+
         const movementDate = movement.transaction_date?.split('T')[0] || '';
         if (!movementDate || movementDate < filterDateFrom || movementDate > filterDateTo) return false;
-        
+
         return true;
     });
 
@@ -130,7 +130,7 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                             options={typeOptions.map(type => typeLabels[type])}
                             selected={selectedTypes.map(type => typeLabels[type])}
                             onChange={(selected) => {
-                                const selectedKeys = selected.map(label => 
+                                const selectedKeys = selected.map(label =>
                                     Object.entries(typeLabels).find(([, val]) => val === label)?.[0] || ''
                                 ).filter(Boolean);
                                 setSelectedTypes(selectedKeys);
@@ -217,13 +217,12 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                             <tr
                                 key={movement.id}
                                 onClick={() => selectTransaction(movement)}
-                                className={`border-b border-gray-200 dark:border-gray-700 transition-colors cursor-pointer ${
-                                    selectedTransaction?.id === movement.id
+                                className={`border-b border-gray-200 dark:border-gray-700 transition-colors cursor-pointer ${selectedTransaction?.id === movement.id
                                         ? 'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                                         : index % 2 === 0
-                                        ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                        : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                }`}
+                                            ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                            : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    }`}
                             >
                                 <td className="py-4 px-4">
                                     <div className="font-medium text-gray-900 dark:text-white">
@@ -240,30 +239,28 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                 </td>
                                 <td className="py-4 px-4">
                                     <span
-                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                            movement.type === 'income'
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${movement.type === 'income'
                                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                                                 : movement.type === 'fixed'
-                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                : movement.type === 'installment'
-                                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                                        }`}
+                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                    : movement.type === 'installment'
+                                                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                                                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                            }`}
                                     >
                                         {movement.type === 'income' ? '+ Ingreso' : '- Gasto'}
                                     </span>
                                 </td>
                                 <td className="py-4 px-4 text-right">
                                     <div
-                                        className={`font-bold text-lg ${
-                                            movement.type === 'income'
+                                        className={`font-bold text-lg ${movement.type === 'income'
                                                 ? 'text-green-600 dark:text-green-400'
                                                 : movement.type === 'fixed'
-                                                ? 'text-blue-600 dark:text-blue-400'
-                                                : movement.type === 'installment'
-                                                ? 'text-purple-600 dark:text-purple-400'
-                                                : 'text-red-600 dark:text-red-400'
-                                        }`}
+                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                    : movement.type === 'installment'
+                                                        ? 'text-purple-600 dark:text-purple-400'
+                                                        : 'text-red-600 dark:text-red-400'
+                                            }`}
                                     >
                                         {movement.type === 'income' ? '+' : '-'} ${parseFloat(movement.amount).toFixed(2)}
                                     </div>
@@ -274,11 +271,10 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                     </div>
                                 </td>
                                 <td className="py-4 px-4">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                                        movement.status === 'completed'
+                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${movement.status === 'completed'
                                             ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                                             : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                    }`}>
+                                        }`}>
                                         {movement.status === 'completed' ? 'Completado' : 'Pendiente'}
                                     </span>
                                 </td>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Modal } from './ui/Modal';
-import AlertDialog from './ui/AlertDialog';
-import Button from './ui/Button';
-import { useFinance } from '../contexts/FinanceContext';
+import { Modal } from '@/components/ui/Modal';
+import AlertDialog from '@/components/ui/AlertDialog';
+import Button from '@/components/ui/Button';
+import { useFinance } from '@/contexts/FinanceContext';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useFinance();
@@ -83,8 +83,8 @@ export default function TransactionDetails() {
                             Monto
                         </label>
                         <p className={`text-3xl font-bold ${transaction.type === 'income'
-                                ? 'text-green-600 dark:text-green-400'
-                                : 'text-red-600 dark:text-red-400'
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-red-600 dark:text-red-400'
                             }`}>
                             {transaction.type === 'income' ? '+' : '-'} ${parseFloat(transaction.amount).toFixed(2)}
                         </p>
@@ -108,8 +108,8 @@ export default function TransactionDetails() {
                             </label>
                             <div className="flex items-center justify-between gap-3">
                                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${transaction.status === 'completed'
-                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                    : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
                                     }`}>
                                     {transaction.status === 'completed' ? 'Completado' : 'Pendiente'}
                                 </span>

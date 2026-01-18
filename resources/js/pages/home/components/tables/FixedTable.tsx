@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useFinance } from '../contexts/FinanceContext';
+import { useFinance } from '@/contexts/FinanceContext';
 
 export default function FixedTable() {
     const { fixeds, subscribe, loadFixedsIfNeeded } = useFinance();

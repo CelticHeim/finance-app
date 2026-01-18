@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
-import RegistroForm from '../components/RegistroForm';
-import Calendar from '../components/calendar/Calendar';
-import BalanceIndicator from '../components/BalanceIndicator';
-import MovementsTable from '../components/MovementsTable';
-import InstallmentTable from '../components/InstallmentTable';
-import FixedTable from '../components/FixedTable';
-import TransactionDetails from '../components/TransactionDetails';
-import { FinanceProvider, useFinance } from '../contexts/FinanceContext';
+import RegistroForm from './components/forms/RegistroForm';
+import Calendar from './components/calendar/Calendar';
+import BalanceIndicator from './components/BalanceIndicator';
+import MovementsTable from './components/tables/MovementsTable';
+import InstallmentTable from './components/tables/InstallmentTable';
+import FixedTable from './components/tables/FixedTable';
+import TransactionDetails from './components/modals/TransactionDetails';
+import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
-    
+
     // Obtener datos y funciones del contexto
     const {
         loadInitialData,
         notifyTransactionAdded,
-        notifyFixedAdded,
-        notifyInstallmentAdded,
+        // notifyFixedAdded,
+        // notifyInstallmentAdded,
     } = useFinance();
 
     // Cargar datos al montar el componente
@@ -66,31 +66,28 @@ function HomeContent() {
                     </button> */}
                     <button
                         onClick={() => setTableView('movements')}
-                        className={`px-6 py-2 rounded-md font-medium transition-all ${
-                            tableView === 'movements'
-                                ? 'bg-blue-500 text-white'
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                        className={`px-6 py-2 rounded-md font-medium transition-all ${tableView === 'movements'
+                            ? 'bg-blue-500 text-white'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
                     >
                         📊 Transacciones
                     </button>
                     <button
                         onClick={() => setTableView('installments')}
-                        className={`px-6 py-2 rounded-md font-medium transition-all ${
-                            tableView === 'installments'
-                                ? 'bg-blue-500 text-white'
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                        className={`px-6 py-2 rounded-md font-medium transition-all ${tableView === 'installments'
+                            ? 'bg-blue-500 text-white'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
                     >
                         📈 A Plazos
                     </button>
                     <button
                         onClick={() => setTableView('fixeds')}
-                        className={`px-6 py-2 rounded-md font-medium transition-all ${
-                            tableView === 'fixeds'
-                                ? 'bg-blue-500 text-white'
-                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                        className={`px-6 py-2 rounded-md font-medium transition-all ${tableView === 'fixeds'
+                            ? 'bg-blue-500 text-white'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
                     >
                         📅 Gastos Fijos
                     </button>
@@ -100,8 +97,8 @@ function HomeContent() {
                 <div className={tableView === 'movements' ? 'block' : 'hidden'}>
                     <MovementsTable />
                 </div>
-                {tableView === 'fixeds' && <FixedTable />}
                 {tableView === 'installments' && <InstallmentTable />}
+                {tableView === 'fixeds' && <FixedTable />}
             </div>
         </div>
     );

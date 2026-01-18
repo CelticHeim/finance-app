@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import IncomeForm from './forms/IncomeForm';
-import ExpenseForm from './forms/ExpenseForm';
+import IncomeForm from './IncomeForm';
+import ExpenseForm from './ExpenseForm';
 
 type FormType = 'income' | 'expense';
 

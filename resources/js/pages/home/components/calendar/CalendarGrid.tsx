@@ -1,5 +1,5 @@
 import CalendarDay from './CalendarDay';
-import type { TransactionRecord } from '../../types/transactions.type';
+import type { TransactionRecord } from '@/types/transactions.type';
 
 interface DayEvent {
     id: string;

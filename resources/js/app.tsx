@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Importar páginas
-import Home from './pages/Home';
+import Home from './pages/home/Home';
 
 const app = document.getElementById('app');
 

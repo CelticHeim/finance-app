@@ -1,5 +1,5 @@
 import CalendarEvent from './CalendarEvent';
-import type { TransactionRecord } from '../../types/transactions.type';
+import type { TransactionRecord } from '@/types/transactions.type';
 
 interface DayEvent {
     id: string;
@@ -29,22 +29,20 @@ export default function CalendarDay({ day, isCurrentMonth, isToday, events, onEv
 
     return (
         <div
-            className={`min-h-24 p-2 border border-gray-200 dark:border-gray-700 transition-all ${
-                isToday
+            className={`min-h-24 p-2 border border-gray-200 dark:border-gray-700 transition-all ${isToday
                     ? 'bg-blue-50 dark:bg-blue-900/20'
                     : isCurrentMonth
-                      ? 'bg-white dark:bg-gray-800'
-                      : 'bg-gray-50 dark:bg-gray-900'
-            } hover:bg-gray-100 dark:hover:bg-gray-700`}
+                        ? 'bg-white dark:bg-gray-800'
+                        : 'bg-gray-50 dark:bg-gray-900'
+                } hover:bg-gray-100 dark:hover:bg-gray-700`}
         >
             <div
-                className={`text-sm font-bold mb-1 ${
-                    isToday
+                className={`text-sm font-bold mb-1 ${isToday
                         ? 'text-blue-600 dark:text-blue-400'
                         : isCurrentMonth
-                          ? 'text-gray-900 dark:text-white'
-                          : 'text-gray-400 dark:text-gray-600'
-                }`}
+                            ? 'text-gray-900 dark:text-white'
+                            : 'text-gray-400 dark:text-gray-600'
+                    }`}
             >
                 {day}
             </div>

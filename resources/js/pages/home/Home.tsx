@@ -7,6 +7,7 @@ import InstallmentTable from './components/tables/InstallmentTable';
 import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
 import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
+import { TransactionSelectionProvider } from '../../contexts/TransactionSelectionContext';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
@@ -104,11 +105,13 @@ function HomeContent() {
     );
 }
 
-// Componente principal que provee el contexto
+// Componente principal que provee los contextos
 export default function Home() {
     return (
         <FinanceProvider>
-            <HomeContent />
+            <TransactionSelectionProvider>
+                <HomeContent />
+            </TransactionSelectionProvider>
         </FinanceProvider>
     );
 }

@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
-import { useFinance } from '@/contexts/FinanceContext';
+import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 
 export default function TransactionDetails() {
-    const { selectedTransaction, selectTransaction } = useFinance();
+    const { selectedTransaction, selectTransaction } = useTransactionSelection();
     const transaction = selectedTransaction;
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 

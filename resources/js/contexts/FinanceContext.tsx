@@ -24,7 +24,6 @@ interface FinanceContextType {
     currentMonth: number;
     currentYear: number;
     loading: boolean;
-    selectedTransaction: TransactionRecord | null;
 
     // Acciones (solo para Calendar + BalanceIndicator)
     loadInitialData: () => Promise<void>;
@@ -33,9 +32,6 @@ interface FinanceContextType {
     // Funciones para cacheo de datos (FixedTable + InstallmentTable)
     loadFixedsIfNeeded: () => Promise<void>;
     loadInstallmentsIfNeeded: () => Promise<void>;
-    
-    // Gestión de transacción seleccionada
-    selectTransaction: (transaction: TransactionRecord | null) => void;
     
     // Sistema de eventos (otros componentes se suscriben)
     subscribe: (event: FinanceEvent, callback: EventCallback) => () => void;
@@ -56,7 +52,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(false);
-    const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null);
 
     // Estados de cacheo (para evitar recargas innecesarias)
     const [fixedsLoaded, setFixedsLoaded] = useState(false);
@@ -189,11 +184,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         emit('installment-added');
     }, [emit]);
 
-    // Seleccionar transacción para mostrar en modal
-    const selectTransaction = useCallback((transaction: TransactionRecord | null) => {
-        setSelectedTransaction(transaction);
-    }, []);
-
     const value: FinanceContextType = {
         // Estados
         summary,
@@ -203,7 +193,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         currentMonth,
         currentYear,
         loading,
-        selectedTransaction,
 
         // Acciones (Calendar + BalanceIndicator)
         loadInitialData,
@@ -212,9 +201,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         // Funciones de cacheo (FixedTable + InstallmentTable)
         loadFixedsIfNeeded,
         loadInstallmentsIfNeeded,
-        
-        // Gestión de transacción seleccionada
-        selectTransaction,
         
         // Notificaciones
         notifyTransactionAdded,

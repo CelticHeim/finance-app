@@ -2,14 +2,12 @@ import { TransactionRecord } from '@/types/transactions.type';
 import { useState, useEffect } from 'react';
 import { getTransactions } from '@/api/finances.api';
 import { useFinance } from '@/contexts/FinanceContext';
+import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 import MultiSelect from '@/components/ui/MultiSelect';
 
-interface MovementsTableProps {
-    refreshTrigger?: number;
-}
-
-export default function MovementsTable({ refreshTrigger = 0 }: MovementsTableProps) {
-    const { subscribe, selectTransaction, selectedTransaction } = useFinance();
+export default function MovementsTable() {
+    const { subscribe } = useFinance();
+    const { selectTransaction, selectedTransaction } = useTransactionSelection();
     const [movements, setMovements] = useState<TransactionRecord[]>([]);
     const [reloadTrigger, setReloadTrigger] = useState(0);
     // Mapeo de tipos a nombres en español
@@ -218,10 +216,10 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                 key={movement.id}
                                 onClick={() => selectTransaction(movement)}
                                 className={`border-b border-gray-200 dark:border-gray-700 transition-colors cursor-pointer ${selectedTransaction?.id === movement.id
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-                                        : index % 2 === 0
-                                            ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                            : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    ? 'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                                    : index % 2 === 0
+                                        ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                        : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 <td className="py-4 px-4">
@@ -240,12 +238,12 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                 <td className="py-4 px-4">
                                     <span
                                         className={`px-3 py-1 rounded-full text-xs font-semibold ${movement.type === 'income'
-                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                : movement.type === 'fixed'
-                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                    : movement.type === 'installment'
-                                                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                                                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                            : movement.type === 'fixed'
+                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                : movement.type === 'installment'
+                                                    ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                                                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                                             }`}
                                     >
                                         {movement.type === 'income' ? '+ Ingreso' : '- Gasto'}
@@ -254,12 +252,12 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                 <td className="py-4 px-4 text-right">
                                     <div
                                         className={`font-bold text-lg ${movement.type === 'income'
-                                                ? 'text-green-600 dark:text-green-400'
-                                                : movement.type === 'fixed'
-                                                    ? 'text-blue-600 dark:text-blue-400'
-                                                    : movement.type === 'installment'
-                                                        ? 'text-purple-600 dark:text-purple-400'
-                                                        : 'text-red-600 dark:text-red-400'
+                                            ? 'text-green-600 dark:text-green-400'
+                                            : movement.type === 'fixed'
+                                                ? 'text-blue-600 dark:text-blue-400'
+                                                : movement.type === 'installment'
+                                                    ? 'text-purple-600 dark:text-purple-400'
+                                                    : 'text-red-600 dark:text-red-400'
                                             }`}
                                     >
                                         {movement.type === 'income' ? '+' : '-'} ${parseFloat(movement.amount).toFixed(2)}
@@ -272,8 +270,8 @@ export default function MovementsTable({ refreshTrigger = 0 }: MovementsTablePro
                                 </td>
                                 <td className="py-4 px-4">
                                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${movement.status === 'completed'
-                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                            : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
                                         }`}>
                                         {movement.status === 'completed' ? 'Completado' : 'Pendiente'}
                                     </span>

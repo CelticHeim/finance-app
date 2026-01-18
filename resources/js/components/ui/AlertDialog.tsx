@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Button from './Button';
 
 interface AlertDialogProps {
     isOpen: boolean;
@@ -55,19 +56,19 @@ export default function AlertDialog({
                     </div>
 
                     <div className="flex gap-2 justify-end">
-                        <button
+                        <Button
                             onClick={handleCancel}
-                            className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                            style="cancel"
                         >
                             {cancelText}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={handleConfirm}
-                            disabled={isLoading}
-                            className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-green-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+                            style="success"
+                            isLoading={isLoading}
                         >
-                            {isLoading ? 'Procesando...' : confirmText}
-                        </button>
+                            {confirmText}
+                        </Button>
                     </div>
                 </div>
             </div>

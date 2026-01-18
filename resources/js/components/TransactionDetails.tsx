@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal } from './ui/Modal';
 import AlertDialog from './ui/AlertDialog';
+import Button from './ui/Button';
 import { useFinance } from '../contexts/FinanceContext';
 
 export default function TransactionDetails() {
@@ -113,12 +114,13 @@ export default function TransactionDetails() {
                                     {transaction.status === 'completed' ? 'Completado' : 'Pendiente'}
                                 </span>
                                 {(transaction.type === 'installment' || transaction.type === 'fixed') && transaction.status !== 'completed' && (
-                                    <button
+                                    <Button
                                         onClick={() => setShowConfirmDialog(true)}
-                                        className="px-4 py-1 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                                        style="success"
+                                        size="sm"
                                     >
                                         Marcar como Pagado
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         </div>
@@ -126,12 +128,13 @@ export default function TransactionDetails() {
                 </div>
 
                 <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-6 py-4 flex gap-2">
-                    <button
+                    <Button
                         onClick={() => selectTransaction(null)}
-                        className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                        style="cancel"
+                        className="flex-1"
                     >
                         Cerrar
-                    </button>
+                    </Button>
                 </div>
             </Modal>
 

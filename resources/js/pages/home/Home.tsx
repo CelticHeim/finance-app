@@ -8,6 +8,7 @@ import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
 import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
 import { TransactionSelectionProvider } from '../../contexts/TransactionSelectionContext';
+import { CacheInvalidationProvider, useCacheInvalidation } from '../../contexts/CacheInvalidationContext';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
@@ -15,10 +16,12 @@ function HomeContent() {
     // Obtener datos y funciones del contexto
     const {
         loadInitialData,
-        notifyTransactionAdded,
-        // notifyFixedAdded,
-        // notifyInstallmentAdded,
+        refetchTransactions,
     } = useFinance();
+
+    const {
+        onTransactionAdded,
+    } = useCacheInvalidation();
 
     // Cargar datos al montar el componente
     useEffect(() => {
@@ -41,8 +44,10 @@ function HomeContent() {
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
                             <RegistroForm onDataUpdated={() => {
-                                // Notificar según el tipo de registro agregado
-                                notifyTransactionAdded();
+                                // Notificar a todos los subscribers de que hay nuevas transacciones
+                                onTransactionAdded();
+                                // También refetch el contexto de finanzas para calendar y balance
+                                refetchTransactions();
                             }} />
                         </div>
                     </div>
@@ -110,7 +115,9 @@ export default function Home() {
     return (
         <FinanceProvider>
             <TransactionSelectionProvider>
-                <HomeContent />
+                <CacheInvalidationProvider>
+                    <HomeContent />
+                </CacheInvalidationProvider>
             </TransactionSelectionProvider>
         </FinanceProvider>
     );

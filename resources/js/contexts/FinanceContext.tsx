@@ -1,46 +1,28 @@
-import { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { getFinances, getCalendarData, getFixeds, getInstallments } from '../api/finances.api';
 import type { SummaryData } from '../types/finances.types';
 import type { FixedRecord } from '../types/fixeds.type';
 import type { InstallmentRecord } from '../types/installments.type';
 import type { TransactionRecord } from '../types/transactions.type';
 
-// Tipos de eventos
-type FinanceEvent = 
-    | 'month-changed'
-    | 'transaction-added'
-    | 'fixed-added'
-    | 'installment-added';
-
-type EventCallback = (data?: any) => void;
-
 // Tipo del contexto
 interface FinanceContextType {
-    // Estados (carga inicial)
+    // Estados
     summary: SummaryData | null;
-    transactions: TransactionRecord[];  // Para Calendar (todas del mes)
+    transactions: TransactionRecord[];
     fixeds: FixedRecord[];
     installments: InstallmentRecord[];
     currentMonth: number;
     currentYear: number;
     loading: boolean;
 
-    // Acciones (solo para Calendar + BalanceIndicator)
+    // Acciones
     loadInitialData: () => Promise<void>;
     setMonth: (month: number, year: number) => Promise<void>;
-    
-    // Funciones para cacheo de datos (FixedTable + InstallmentTable)
-    loadFixedsIfNeeded: () => Promise<void>;
-    loadInstallmentsIfNeeded: () => Promise<void>;
-    
-    // Sistema de eventos (otros componentes se suscriben)
-    subscribe: (event: FinanceEvent, callback: EventCallback) => () => void;
-    notifyTransactionAdded: () => void;
-    notifyFixedAdded: () => void;
-    notifyInstallmentAdded: () => void;
+    refetchTransactions: () => Promise<void>;
+    refetchFixeds: () => Promise<void>;
+    refetchInstallments: () => Promise<void>;
 }
-
-const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 // Provider Component
 export function FinanceProvider({ children }: { children: ReactNode }) {
@@ -52,34 +34,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(false);
-
-    // Estados de cacheo (para evitar recargas innecesarias)
-    const [fixedsLoaded, setFixedsLoaded] = useState(false);
-    const [installmentsLoaded, setInstallmentsLoaded] = useState(false);
-
-    // Sistema de eventos (pub-sub pattern)
-    const subscribers = useRef<Map<FinanceEvent, Set<EventCallback>>>(new Map());
-
-    // Función para suscribirse a eventos
-    const subscribe = useCallback((event: FinanceEvent, callback: EventCallback) => {
-        if (!subscribers.current.has(event)) {
-            subscribers.current.set(event, new Set());
-        }
-        subscribers.current.get(event)!.add(callback);
-
-        // Retorna función para desuscribirse
-        return () => {
-            subscribers.current.get(event)?.delete(callback);
-        };
-    }, []);
-
-    // Función para emitir eventos
-    const emit = useCallback((event: FinanceEvent, data?: any) => {
-        const callbacks = subscribers.current.get(event);
-        if (callbacks) {
-            callbacks.forEach(callback => callback(data));
-        }
-    }, []);
 
     // Cargar datos iniciales (mes actual)
     const loadInitialData = useCallback(async () => {
@@ -107,7 +61,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Cambiar mes (actualiza summary y transactions de Calendar y BalanceIndicator)
+    // Cambiar mes (actualiza summary y transactions)
     const setMonth = useCallback(async (month: number, year: number) => {
         setLoading(true);
         try {
@@ -120,69 +74,49 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 setSummary(calendarResponse.data.summary);
                 setTransactions(calendarResponse.data.transactions);
             }
-
-            emit('month-changed', { month, year });
         } catch (error) {
             console.error('Error changing month:', error);
         } finally {
             setLoading(false);
         }
-    }, [emit]);
+    }, []);
 
-    // Funciones para cargar datos con cacheo
-    const loadFixedsIfNeeded = useCallback(async () => {
-        // Si ya están cargados, no hacer nada
-        if (fixedsLoaded) {
-            return;
+    // Refetch transactions (se usa cuando se agrega un income/expense)
+    const refetchTransactions = useCallback(async () => {
+        try {
+            const calendarResponse = await getCalendarData(currentMonth + 1, currentYear);
+            if (calendarResponse?.data) {
+                setTransactions(calendarResponse.data.transactions);
+                setSummary(calendarResponse.data.summary);
+            }
+        } catch (error) {
+            console.error('Error refetching transactions:', error);
         }
+    }, [currentMonth, currentYear]);
 
+    // Refetch fixeds (se usa cuando se agrega un fixed)
+    const refetchFixeds = useCallback(async () => {
         try {
             const response = await getFixeds();
             if (response?.data) {
                 setFixeds(response.data);
-                setFixedsLoaded(true);
             }
         } catch (error) {
-            console.error('Error loading fixeds:', error);
+            console.error('Error refetching fixeds:', error);
         }
-    }, [fixedsLoaded]);
+    }, []);
 
-    const loadInstallmentsIfNeeded = useCallback(async () => {
-        // Si ya están cargados, no hacer nada
-        if (installmentsLoaded) {
-            return;
-        }
-
+    // Refetch installments (se usa cuando se agrega un installment)
+    const refetchInstallments = useCallback(async () => {
         try {
             const response = await getInstallments();
             if (response?.data) {
                 setInstallments(response.data);
-                setInstallmentsLoaded(true);
             }
         } catch (error) {
-            console.error('Error loading installments:', error);
+            console.error('Error refetching installments:', error);
         }
-    }, [installmentsLoaded]);
-
-    // Notificar que se agregó una transacción (income/expense)
-    // Los componentes escuchan este evento y hacen su propia recarga
-    const notifyTransactionAdded = useCallback(() => {
-        emit('transaction-added');
-    }, [emit]);
-
-    // Notificar que se agregó un fixed
-    // Invalidar cache de fixeds para que se recarguen
-    const notifyFixedAdded = useCallback(() => {
-        setFixedsLoaded(false);  // Invalidar cache
-        emit('fixed-added');
-    }, [emit]);
-
-    // Notificar que se agregó un installment
-    // Invalidar cache de installments para que se recarguen
-    const notifyInstallmentAdded = useCallback(() => {
-        setInstallmentsLoaded(false);  // Invalidar cache
-        emit('installment-added');
-    }, [emit]);
+    }, []);
 
     const value: FinanceContextType = {
         // Estados
@@ -194,21 +128,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         currentYear,
         loading,
 
-        // Acciones (Calendar + BalanceIndicator)
+        // Acciones
         loadInitialData,
         setMonth,
-
-        // Funciones de cacheo (FixedTable + InstallmentTable)
-        loadFixedsIfNeeded,
-        loadInstallmentsIfNeeded,
-        
-        // Notificaciones
-        notifyTransactionAdded,
-        notifyFixedAdded,
-        notifyInstallmentAdded,
-        
-        // Sistema de eventos
-        subscribe,
+        refetchTransactions,
+        refetchFixeds,
+        refetchInstallments,
     };
 
     return (
@@ -217,6 +142,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         </FinanceContext.Provider>
     );
 }
+
+const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 // Hook personalizado para usar el contexto
 export function useFinance() {

@@ -1,12 +1,12 @@
 import { TransactionRecord } from '@/types/transactions.type';
 import { useState, useEffect } from 'react';
 import { getTransactions } from '@/api/finances.api';
-import { useFinance } from '@/contexts/FinanceContext';
+import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 import MultiSelect from '@/components/ui/MultiSelect';
 
 export default function MovementsTable() {
-    const { subscribe } = useFinance();
+    const { subscribeToTransactions } = useCacheInvalidation();
     const { selectTransaction, selectedTransaction } = useTransactionSelection();
     const [movements, setMovements] = useState<TransactionRecord[]>([]);
     const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -45,14 +45,14 @@ export default function MovementsTable() {
     const [filterDateFrom, setFilterDateFrom] = useState(monthRange.from);
     const [filterDateTo, setFilterDateTo] = useState(monthRange.to);
 
-    // Suscribirse al evento 'transaction-added' para recargar datos
+    // Suscribirse a cambios de transacciones (cuando se agrega una nueva)
     useEffect(() => {
-        const unsubscribe = subscribe('transaction-added', () => {
+        const unsubscribe = subscribeToTransactions(() => {
             setReloadTrigger(prev => prev + 1);
         });
 
         return unsubscribe;
-    }, [subscribe]);
+    }, [subscribeToTransactions]);
 
     // Cargar datos de la API cuando cambien los tipos seleccionados o cuando se reciba un evento de recarga
     useEffect(() => {

@@ -1,22 +1,24 @@
 import { useEffect } from 'react';
 import { useFinance } from '@/contexts/FinanceContext';
+import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
 
 export default function InstallmentTable() {
-    const { installments, subscribe, loadInstallmentsIfNeeded } = useFinance();
+    const { installments, refetchInstallments } = useFinance();
+    const { subscribeToInstallments } = useCacheInvalidation();
 
-    // Cargar datos cuando el componente se monta (si no están en cache)
+    // Cargar datos cuando el componente se monta
     useEffect(() => {
-        loadInstallmentsIfNeeded();
-    }, [loadInstallmentsIfNeeded]);
+        refetchInstallments();
+    }, [refetchInstallments]);
 
-    // Recargar cuando se recibe evento de 'installment-added'
+    // Recargar cuando se recibe notificación de 'installment-added'
     useEffect(() => {
-        const unsubscribe = subscribe('installment-added', () => {
-            loadInstallmentsIfNeeded();
+        const unsubscribe = subscribeToInstallments(() => {
+            refetchInstallments();
         });
 
         return unsubscribe;
-    }, [subscribe, loadInstallmentsIfNeeded]);
+    }, [subscribeToInstallments, refetchInstallments]);
 
     const getStatusBadge = (status: string) => {
         switch (status) {

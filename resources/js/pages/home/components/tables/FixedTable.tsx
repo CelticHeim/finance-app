@@ -1,22 +1,24 @@
 import { useEffect } from 'react';
 import { useFinance } from '@/contexts/FinanceContext';
+import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
 
 export default function FixedTable() {
-    const { fixeds, subscribe, loadFixedsIfNeeded } = useFinance();
+    const { fixeds, refetchFixeds } = useFinance();
+    const { subscribeToFixeds } = useCacheInvalidation();
 
-    // Cargar datos cuando el componente se monta (si no están en cache)
+    // Cargar datos cuando el componente se monta
     useEffect(() => {
-        loadFixedsIfNeeded();
-    }, [loadFixedsIfNeeded]);
+        refetchFixeds();
+    }, [refetchFixeds]);
 
-    // Recargar cuando se recibe evento de 'fixed-added'
+    // Recargar cuando se recibe notificación de 'fixed-added'
     useEffect(() => {
-        const unsubscribe = subscribe('fixed-added', () => {
-            loadFixedsIfNeeded();
+        const unsubscribe = subscribeToFixeds(() => {
+            refetchFixeds();
         });
 
         return unsubscribe;
-    }, [subscribe, loadFixedsIfNeeded]);
+    }, [subscribeToFixeds, refetchFixeds]);
 
     const getCategoryColor = (category: string): string => {
         const colors: { [key: string]: string } = {

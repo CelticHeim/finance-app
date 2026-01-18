@@ -2,16 +2,9 @@ import { useForm } from 'react-hook-form';
 import { createExpense } from '@/api/expenses.api';
 import { createFixed } from '@/api/fixed.api';
 import { createInstallment } from '@/api/installment.api';
-import type { CreateExpenseData } from '@/types/expenses.type';
+import type { CreateExpenseData, ExpenseFormData } from '@/types/expenses.type';
 import type { CreateFixedData } from '@/types/fixeds.type';
 import type { CreateInstallmentData } from '@/types/installments.type';
-
-interface ExpenseFormData extends CreateExpenseData {
-    expenseType: 'expense' | 'fixed' | 'installment';
-    number_of_installments?: number;
-    amount?: number;
-    payment_day?: number;
-}
 
 interface ExpenseFormProps {
     onSubmitSuccess?: () => void;
@@ -45,30 +38,30 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             if (data.expenseType === 'fixed') {
                 // Crear gasto fijo
                 const fixedData: CreateFixedData = {
-                    amount: data.amount,
+                    amount: parseFloat(data.amount as string),
                     category: data.category,
                     description: data.description,
                     due_date: data.payment_day?.toString() || '1',
                 };
                 await createFixed(fixedData);
-            } 
-            
+            }
+
             if (data.expenseType === 'installment') {
                 // Crear gasto a plazos
                 const installmentData: CreateInstallmentData = {
-                    amount: data.amount,
+                    amount: parseFloat(data.amount as string),
                     description: data.description,
                     category: data.category,
                     number_of_installments: data.number_of_installments || 3,
                     due_date: data.transaction_date,
                 };
                 await createInstallment(installmentData);
-            } 
-            
+            }
+
             if (data.expenseType === 'expense') {
                 // Crear gasto normal
                 const expenseData: CreateExpenseData = {
-                    amount: data.amount,
+                    amount: parseFloat(data.amount as string),
                     description: data.description,
                     transaction_date: data.transaction_date,
                     category: data.category,
@@ -77,7 +70,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             }
 
             reset({
-                amount: undefined,
+                amount: '',
                 category: 'comida',
                 description: '',
                 transaction_date: new Date().toISOString().split('T')[0],
@@ -184,11 +177,10 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                                     target: { value: cat.value },
                                 });
                             }}
-                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                                selectedCategory === cat.value
-                                    ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-offset-gray-800'
-                                    : 'opacity-70 hover:opacity-100'
-                            }`}
+                            className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedCategory === cat.value
+                                ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-offset-gray-800'
+                                : 'opacity-70 hover:opacity-100'
+                                }`}
                             style={{
                                 backgroundColor: cat.color,
                                 color: 'white',

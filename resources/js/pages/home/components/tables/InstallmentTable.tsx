@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useFinance } from '@/contexts/FinanceContext';
 import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
+import InstallmentDetails from '@/pages/home/components/modals/InstallmentDetails';
+import type { InstallmentRecord } from '@/types/installments.type';
 
 export default function InstallmentTable() {
     const { installments, refetchInstallments } = useFinance();
     const { subscribeToInstallments } = useCacheInvalidation();
+    const [selectedInstallment, setSelectedInstallment] = useState<InstallmentRecord | null>(null);
 
     // Cargar datos cuando el componente se monta
     useEffect(() => {
@@ -62,67 +65,76 @@ export default function InstallmentTable() {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Pagos a Plazos
-            </h2>
+        <>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                    Pagos a Plazos
+                </h2>
 
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b-2 border-gray-300 dark:border-gray-700">
-                            <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                                Cuota
-                            </th>
-                            <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                                Monto
-                            </th>
-                            <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                                Vencimiento
-                            </th>
-                            <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                                Estado
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {installments.length > 0 ? (
-                            installments.map((installment) => (
-                                <tr
-                                    key={installment.id}
-                                    className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                                        isOverdue(installment.due_date) && installment.status === 'pending'
-                                            ? 'bg-red-50 dark:bg-red-900/10'
-                                            : ''
-                                    }`}
-                                >
-                                    <td className="py-4 px-4 text-gray-900 dark:text-gray-100 font-medium">
-                                        Cuota {installment.current_installment}/{installment.number_of_installments}
-                                    </td>
-                                    <td className="py-4 px-4 text-right text-gray-900 dark:text-gray-100 font-semibold">
-                                        ${parseFloat(installment.amount).toFixed(2)}
-                                    </td>
-                                    <td className="py-4 px-4 text-gray-600 dark:text-gray-400">
-                                        {formatDate(installment.due_date)}
-                                    </td>
-                                    <td className="py-4 px-4 text-center">
-                                        {getStatusBadge(installment.status)}
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b-2 border-gray-300 dark:border-gray-700">
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                    Cuota
+                                </th>
+                                <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                    Monto
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                    Vencimiento
+                                </th>
+                                <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                    Estado
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {installments.length > 0 ? (
+                                installments.map((installment) => (
+                                    <tr
+                                        key={installment.id}
+                                        onClick={() => setSelectedInstallment(installment)}
+                                        className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+                                            isOverdue(installment.due_date) && installment.status === 'pending'
+                                                ? 'bg-red-50 dark:bg-red-900/10'
+                                                : ''
+                                        }`}
+                                    >
+                                        <td className="py-4 px-4 text-gray-900 dark:text-gray-100 font-medium">
+                                            Cuota {installment.current_installment}/{installment.number_of_installments}
+                                        </td>
+                                        <td className="py-4 px-4 text-right text-gray-900 dark:text-gray-100 font-semibold">
+                                            ${parseFloat(installment.amount).toFixed(2)}
+                                        </td>
+                                        <td className="py-4 px-4 text-gray-600 dark:text-gray-400">
+                                            {formatDate(installment.due_date)}
+                                        </td>
+                                        <td className="py-4 px-4 text-center">
+                                            {getStatusBadge(installment.status)}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={4}
+                                        className="py-8 px-4 text-center text-gray-500 dark:text-gray-400"
+                                    >
+                                        No hay pagos a plazos registrados
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td
-                                    colSpan={4}
-                                    className="py-8 px-4 text-center text-gray-500 dark:text-gray-400"
-                                >
-                                    No hay pagos a plazos registrados
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+
+            <InstallmentDetails
+                isOpen={!!selectedInstallment}
+                installment={selectedInstallment}
+                onClose={() => setSelectedInstallment(null)}
+            />
+        </>
     );
 }

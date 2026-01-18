@@ -65,4 +65,11 @@ class InstallmentController extends Controller {
             'data' => $installment,
         ], 201);
     }
+
+    public function show(Installment $installment) {
+        return response()->json([
+            'message' => 'Detalle del gasto a cuotas',
+            'data' => $installment->load('transactions'),
+        ]);
+    }
 }

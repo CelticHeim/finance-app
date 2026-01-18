@@ -10,3 +10,13 @@ export const createInstallment = async (data: CreateInstallmentData) => {
         throw error;
     }
 };
+
+export const getInstallment = async (id: number) => {
+    try {
+        const response = await api.get(`/installments/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching installment:', error);
+        throw error;
+    }
+};

@@ -19,6 +19,7 @@ interface ModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     children: ReactNode;
+    className?: string;
 }
 
 function ModalHeader({ title, children, onClose }: ModalHeaderProps) {
@@ -56,7 +57,7 @@ function ModalFooter({ children }: ModalFooterProps) {
     );
 }
 
-function ModalContent({ isOpen, onOpenChange, children }: ModalProps) {
+function ModalContent({ isOpen, onOpenChange, children, className = 'max-w-md' }: ModalProps) {
     if (!isOpen) return null;
 
     const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -70,16 +71,16 @@ function ModalContent({ isOpen, onOpenChange, children }: ModalProps) {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in"
             onClick={handleBackdropClick}
         >
-            <div className="relative w-full max-w-md rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 animate-zoom-in">
+            <div className={`relative w-full ${className} rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 animate-zoom-in`}>
                 {children}
             </div>
         </div>
     );
 }
 
-export function Modal({ isOpen, onOpenChange, children }: ModalProps) {
+export function Modal({ isOpen, onOpenChange, children, className }: ModalProps) {
     return (
-        <ModalContent isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent isOpen={isOpen} onOpenChange={onOpenChange} className={className}>
             {children}
         </ModalContent>
     );

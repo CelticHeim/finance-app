@@ -5,6 +5,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\FixedController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,3 +28,4 @@ Route::apiResource('incomes', IncomeController::class);
 Route::apiResource('expenses', ExpenseController::class);
 Route::apiResource('fixeds', FixedController::class);
 Route::apiResource('installments', InstallmentController::class);
+Route::post('transactions/{transaction}/complete', [TransactionController::class, 'complete']);

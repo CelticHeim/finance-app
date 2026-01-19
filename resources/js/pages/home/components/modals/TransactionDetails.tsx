@@ -3,11 +3,15 @@ import { Modal } from '@/components/ui/Modal';
 import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
+import { completeTransaction } from '@/api/transaction.api';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionSelection();
     const transaction = selectedTransaction;
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [applyDiscount, setApplyDiscount] = useState(false);
+    const [discountValue, setDiscountValue] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     if (!transaction) return null;
 
@@ -142,19 +146,76 @@ export default function TransactionDetails() {
                 isOpen={showConfirmDialog}
                 onOpenChange={setShowConfirmDialog}
                 title="Confirmar Pago"
-                onConfirm={() => {
-                    console.log('Pago confirmado para:', transaction?.id);
-                    // Aquí irá la lógica para marcar como pagado
+                onConfirm={async () => {
+                    if (!transaction) return;
+                    
+                    try {
+                        setIsLoading(true);
+                        const payload = applyDiscount && discountValue !== null && discountValue !== '' 
+                            ? { discount: parseFloat(discountValue.toString()) }
+                            : { discount: null };
+                        
+                        await completeTransaction(transaction.id, payload);
+                        setShowConfirmDialog(false);
+                        setApplyDiscount(false);
+                        setDiscountValue(null);
+                        selectTransaction(null);
+                    } catch (error) {
+                        console.error('Error al marcar como pagado:', error);
+                    } finally {
+                        setIsLoading(false);
+                    }
                 }}
-                onCancel={() => setShowConfirmDialog(false)}
+                onCancel={() => {
+                    setShowConfirmDialog(false);
+                    setApplyDiscount(false);
+                    setDiscountValue(null);
+                }}
                 confirmText="Marcar como Pagado"
                 cancelText="Cancelar"
             >
-                <p className="text-gray-700 dark:text-gray-300">
-                    ¿Deseas marcar como pagado el {transaction?.type === 'installment' ? 'pago a plazo' : 'gasto fijo'} de{' '}
-                    <span className="font-bold">{transaction?.description}</span> por{' '}
-                    <span className="font-bold text-green-600 dark:text-green-400">${parseFloat(transaction?.amount || '0').toFixed(2)}</span>?
-                </p>
+                <div className="space-y-4">
+                    <p className="text-gray-700 dark:text-gray-300">
+                        ¿Deseas marcar como pagado el {transaction?.type === 'installment' ? 'pago a plazo' : 'gasto fijo'} de{' '}
+                        <span className="font-bold">{transaction?.description}</span> por{' '}
+                        <span className="font-bold text-green-600 dark:text-green-400">${parseFloat(transaction?.amount || '0').toFixed(2)}</span>?
+                    </p>
+                    
+                    {/* Checkbox para aplicar descuento */}
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="applyDiscount"
+                            checked={applyDiscount}
+                            onChange={(e) => setApplyDiscount(e.target.checked)}
+                            disabled={isLoading}
+                            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 cursor-pointer"
+                        />
+                        <label htmlFor="applyDiscount" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                            Aplicar descuento
+                        </label>
+                    </div>
+                    
+                    {/* Campo descuento - solo se muestra si el checkbox está activo */}
+                    {applyDiscount && (
+                        <div>
+                            <label htmlFor="discountInput" className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                                Descuento
+                            </label>
+                            <input
+                                id="discountInput"
+                                type="number"
+                                placeholder="Ingresa el monto del descuento"
+                                value={discountValue ?? ''}
+                                onChange={(e) => setDiscountValue(e.target.value === '' ? null : parseFloat(e.target.value))}
+                                disabled={isLoading}
+                                step="0.01"
+                                min="0"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            />
+                        </div>
+                    )}
+                </div>
             </AlertDialog>
         </>
     );

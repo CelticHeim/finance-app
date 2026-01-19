@@ -1,4 +1,6 @@
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import Toast from '@/components/ui/Toast';
 import { createExpense } from '@/api/expenses.api';
 import { createFixed } from '@/api/fixed.api';
 import { createInstallment } from '@/api/installment.api';
@@ -23,6 +25,9 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
         },
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+    const [toastConfig, setToastConfig] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
     const expenseCategories = [
         { value: 'comida', label: 'Comida', color: '#F59E0B' },
         { value: 'servicios', label: 'Servicios', color: '#3B82F6' },
@@ -35,6 +40,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
 
     const onSubmit = async (data: ExpenseFormData) => {
         try {
+            setIsLoading(true);
             if (data.expenseType === 'fixed') {
                 // Crear gasto fijo
                 const fixedData: CreateFixedData = {
@@ -78,9 +84,14 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 number_of_installments: 3,
                 payment_day: 1,
             });
+            
+            setToastConfig({ message: 'Gasto registrado exitosamente', type: 'success' });
             onSubmitSuccess?.();
         } catch (error) {
             console.error('Error submitting expense:', error);
+            setToastConfig({ message: 'Error al registrar el gasto', type: 'error' });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -197,7 +208,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             {(expenseType === 'expense' || expenseType === 'installment') && (
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {expenseType === 'installment' ? 'Fecha de pago' : 'Fecha'}
+                        {expenseType === 'installment' ? 'Fecha del primer pago' : 'Fecha'}
                     </label>
                     <input
                         type="date"
@@ -245,10 +256,23 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             {/* Submit button */}
             <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 transition-all"
+                disabled={isLoading}
+                className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${
+                    isLoading 
+                        ? 'bg-red-400 cursor-not-allowed opacity-70' 
+                        : 'bg-red-500 hover:bg-red-600'
+                }`}
             >
-                - Agregar Gasto
+                {isLoading ? 'Guardando...' : '- Agregar Gasto'}
             </button>
+
+            {toastConfig && (
+                <Toast
+                    message={toastConfig.message}
+                    type={toastConfig.type}
+                    onClose={() => setToastConfig(null)}
+                />
+            )}
         </form>
     );
 }

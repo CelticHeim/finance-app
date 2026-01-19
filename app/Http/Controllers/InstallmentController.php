@@ -18,27 +18,13 @@ class InstallmentController extends Controller {
             'due_date' => 'required|date',
         ]);
 
-        // $validated['first_payment_date'] = $validated['due_date'];
-
-        // $firstDate = Carbon::createFromFormat('Y-m-d', $validated['due_date']);
-        // $lastDate = $firstDate->copy()->addMonths($validated['number_of_installments'] - 1);
-        // $validated['last_payment_date'] = $lastDate->format('Y-m-d');
-
-        // $installment = Installment::create($validated);
-
         $installment = new Installment();
         $installment->amount = $validated['amount'];
         $installment->description = $validated['description'] ?? '';
         $installment->category = $validated['category'];
         $installment->due_date = $validated['due_date'];
         $installment->number_of_installments = $validated['number_of_installments'];
-        // $installment->current_installment = 0;
-
-        // $firstPaymentDate = Carbon::createFromFormat('Y-m-d', $validated['due_date']);
-        // $lastPaymentDate = $firstPaymentDate->copy()->addMonths($validated['number_of_installments'] - 1);
-
-        // $installment->first_payment_date = $firstPaymentDate->format('Y-m-d');
-        // $installment->last_payment_date = $lastPaymentDate->format('Y-m-d');
+        
         $installment->status = 'pending';
         $installment->save();
 

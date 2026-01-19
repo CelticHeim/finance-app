@@ -1,4 +1,6 @@
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import Toast from '@/components/ui/Toast';
 import { createIncome } from '@/api/incomes.api';
 import type { CreateIncomeData } from '@/types/incomes.type';
 
@@ -17,6 +19,9 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
         },
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+    const [toastConfig, setToastConfig] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
     const incomeCategories = [
         { value: 'sueldo', label: 'Sueldo', color: '#10B981' },
         { value: 'bonus', label: 'Bonus', color: '#059669' },
@@ -27,16 +32,25 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
     const selectedCategory = watch('category');
 
     const onSubmit = async (data: CreateIncomeData) => {
-        await createIncome(data);
-        reset({
-            amount: '',
-            category: 'sueldo',
-            description: 'Sueldo semanal',
-            // discount: 0,
-            transaction_date: new Date().toISOString().split('T')[0],
-        });
-        // Ejecutar callback después de éxito
-        onSubmitSuccess?.();
+        try {
+            setIsLoading(true);
+            await createIncome(data);
+            reset({
+                amount: '',
+                category: 'sueldo',
+                description: 'Sueldo semanal',
+                // discount: 0,
+                transaction_date: new Date().toISOString().split('T')[0],
+            });
+            setToastConfig({ message: 'Ingreso registrado exitosamente', type: 'success' });
+            // Ejecutar callback después de éxito
+            onSubmitSuccess?.();
+        } catch (error) {
+            console.error('Error submitting income:', error);
+            setToastConfig({ message: 'Error al registrar el ingreso', type: 'error' });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -115,10 +129,23 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
             {/* Submit button */}
             <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 transition-all"
+                disabled={isLoading}
+                className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${
+                    isLoading 
+                        ? 'bg-green-400 cursor-not-allowed opacity-70' 
+                        : 'bg-green-500 hover:bg-green-600'
+                }`}
             >
-                + Agregar Ingreso
+                {isLoading ? 'Guardando...' : '+ Agregar Ingreso'}
             </button>
+
+            {toastConfig && (
+                <Toast
+                    message={toastConfig.message}
+                    type={toastConfig.type}
+                    onClose={() => setToastConfig(null)}
+                />
+            )}
         </form>
     );
 }

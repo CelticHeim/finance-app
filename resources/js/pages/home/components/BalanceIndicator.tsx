@@ -13,7 +13,7 @@ export default function BalanceIndicator() {
                             Balance Disponible
                         </p>
                         <p className="text-3xl font-bold text-green-900 dark:text-green-200">
-                            ${summary?.available_balance}
+                            ${summary?.available_balance || 0}
                         </p>
                     </div>
                     <div className="text-4xl text-green-200 dark:text-green-800">
@@ -30,7 +30,7 @@ export default function BalanceIndicator() {
                             Deuda Total
                         </p>
                         <p className="text-3xl font-bold text-red-900 dark:text-red-200">
-                            ${summary?.total_debt}
+                            ${summary?.total_debt || 0}
                         </p>
                     </div>
                     <div className="text-4xl text-red-200 dark:text-red-800">
@@ -47,7 +47,7 @@ export default function BalanceIndicator() {
                             Ingresos Mes Actual
                         </p>
                         <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
-                            ${summary?.current_month_income}
+                            ${summary?.current_month_income || 0}
                         </p>
                     </div>
                     <div className="text-4xl text-blue-200 dark:text-blue-800">
@@ -64,7 +64,7 @@ export default function BalanceIndicator() {
                             Deuda Mes Actual
                         </p>
                         <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">
-                            ${summary?.current_month_debt}
+                            ${summary?.current_month_debt || 0}
                         </p>
                     </div>
                     <div className="text-4xl text-amber-200 dark:text-amber-800">

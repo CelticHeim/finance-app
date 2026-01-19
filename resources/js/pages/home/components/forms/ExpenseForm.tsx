@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import Toast from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import { createExpense } from '@/api/expenses.api';
 import { createFixed } from '@/api/fixed.api';
 import { createInstallment } from '@/api/installment.api';
@@ -26,7 +26,7 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
     });
 
     const [isLoading, setIsLoading] = useState(false);
-    const [toastConfig, setToastConfig] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const { showToast } = useToast();
 
     const expenseCategories = [
         { value: 'comida', label: 'Comida', color: '#F59E0B' },
@@ -85,11 +85,11 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                 payment_day: 1,
             });
             
-            setToastConfig({ message: 'Gasto registrado exitosamente', type: 'success' });
+            showToast('Gasto registrado exitosamente', 'success');
             onSubmitSuccess?.();
         } catch (error) {
             console.error('Error submitting expense:', error);
-            setToastConfig({ message: 'Error al registrar el gasto', type: 'error' });
+            showToast('Error al registrar el gasto', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -265,14 +265,6 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             >
                 {isLoading ? 'Guardando...' : '- Agregar Gasto'}
             </button>
-
-            {toastConfig && (
-                <Toast
-                    message={toastConfig.message}
-                    type={toastConfig.type}
-                    onClose={() => setToastConfig(null)}
-                />
-            )}
         </form>
     );
 }

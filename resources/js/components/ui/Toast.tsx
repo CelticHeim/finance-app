@@ -1,16 +1,85 @@
 import { useEffect, useState } from 'react';
+import { Check, X, AlertCircle, AlertTriangle, X as XIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface ToastProps {
     message: string;
     type?: 'success' | 'error' | 'info' | 'warning';
+    transactionType?: 'income' | 'expense' | 'installment' | 'fixed';
     duration?: number;
+    Icon?: LucideIcon;
     onClose?: () => void;
 }
 
-export default function Toast({ message, type = 'success', duration = 3000, onClose }: ToastProps) {
-    const [isVisible, setIsVisible] = useState(true);
+export default function Toast({ message, type = 'success', duration = 3000, transactionType, Icon, onClose }: ToastProps) {
     const [isExiting, setIsExiting] = useState(false);
     const [progress, setProgress] = useState(100);
+
+    // Definir colores según tipo de transacción si existe, sino por tipo de toast
+    const getTypeStyles = () => {
+        if (transactionType) {
+            switch (transactionType) {
+                case 'income':
+                    return {
+                        bg: 'bg-green-500 dark:bg-green-600',
+                        border: 'border-green-600 dark:border-green-700',
+                        progressBg: 'bg-green-600 dark:bg-green-700',
+                    };
+                case 'expense':
+                    return {
+                        bg: 'bg-red-500 dark:bg-red-600',
+                        border: 'border-red-600 dark:border-red-700',
+                        progressBg: 'bg-red-600 dark:bg-red-700',
+                    };
+                case 'installment':
+                    return {
+                        bg: 'bg-purple-500 dark:bg-purple-600',
+                        border: 'border-purple-600 dark:border-purple-700',
+                        progressBg: 'bg-purple-600 dark:bg-purple-700',
+                    };
+                case 'fixed':
+                    return {
+                        bg: 'bg-blue-500 dark:bg-blue-600',
+                        border: 'border-blue-600 dark:border-blue-700',
+                        progressBg: 'bg-blue-600 dark:bg-blue-700',
+                    };
+            }
+        }
+
+        // Colores por tipo de toast
+        switch (type) {
+            case 'success':
+                return {
+                    bg: 'bg-green-500 dark:bg-green-600',
+                    border: 'border-green-600 dark:border-green-700',
+                    progressBg: 'bg-green-600 dark:bg-green-700',
+                };
+            case 'error':
+                return {
+                    bg: 'bg-red-500 dark:bg-red-600',
+                    border: 'border-red-600 dark:border-red-700',
+                    progressBg: 'bg-red-600 dark:bg-red-700',
+                };
+            case 'info':
+                return {
+                    bg: 'bg-blue-500 dark:bg-blue-600',
+                    border: 'border-blue-600 dark:border-blue-700',
+                    progressBg: 'bg-blue-600 dark:bg-blue-700',
+                };
+            case 'warning':
+                return {
+                    bg: 'bg-yellow-500 dark:bg-yellow-600',
+                    border: 'border-yellow-600 dark:border-yellow-700',
+                    progressBg: 'bg-yellow-600 dark:bg-yellow-700',
+                };
+            default:
+                return {
+                    bg: 'bg-green-500 dark:bg-green-600',
+                    border: 'border-green-600 dark:border-green-700',
+                    progressBg: 'bg-green-600 dark:bg-green-700',
+                };
+        }
+    };
 
     useEffect(() => {
         const startTime = Date.now();
@@ -36,43 +105,30 @@ export default function Toast({ message, type = 'success', duration = 3000, onCl
     useEffect(() => {
         if (isExiting) {
             const timer = setTimeout(() => {
-                setIsVisible(false);
                 onClose?.();
             }, 300);
             return () => clearTimeout(timer);
         }
     }, [isExiting, onClose]);
 
-    if (!isVisible) return null;
-
     const typeStyles = {
         success: {
-            bg: 'bg-green-500 dark:bg-green-600',
-            icon: '✓',
-            border: 'border-green-600 dark:border-green-700',
-            progressBg: 'bg-green-600 dark:bg-green-700',
+            Icon: Check,
         },
         error: {
-            bg: 'bg-red-500 dark:bg-red-600',
-            icon: '✕',
-            border: 'border-red-600 dark:border-red-700',
-            progressBg: 'bg-red-600 dark:bg-red-700',
+            Icon: X,
         },
         info: {
-            bg: 'bg-blue-500 dark:bg-blue-600',
-            icon: 'ℹ',
-            border: 'border-blue-600 dark:border-blue-700',
-            progressBg: 'bg-blue-600 dark:bg-blue-700',
+            Icon: AlertCircle,
         },
         warning: {
-            bg: 'bg-yellow-500 dark:bg-yellow-600',
-            icon: '⚠',
-            border: 'border-yellow-600 dark:border-yellow-700',
-            progressBg: 'bg-yellow-600 dark:bg-yellow-700',
+            Icon: AlertTriangle,
         },
     };
 
-    const style = typeStyles[type];
+    const style = getTypeStyles();
+    const DefaultIcon = typeStyles[type].Icon;
+    const displayIcon = Icon || DefaultIcon;
 
     return (
         <div
@@ -83,16 +139,16 @@ export default function Toast({ message, type = 'success', duration = 3000, onCl
             }`}
         >
             <div className="flex items-center gap-3 px-6 py-4">
-                <span className="text-lg font-bold flex-shrink-0">{style.icon}</span>
+                {displayIcon && <displayIcon className="w-5 h-5 flex-shrink-0" />}
                 <span className="flex-1">{message}</span>
                 <button
                     onClick={() => {
                         setIsExiting(true);
                     }}
-                    className="ml-2 flex-shrink-0 text-xl font-bold hover:opacity-80 transition-opacity"
+                    className="ml-2 flex-shrink-0 hover:opacity-80 transition-opacity"
                     aria-label="Cerrar"
                 >
-                    ✕
+                    <XIcon className="w-5 h-5" />
                 </button>
             </div>
             <div className={`h-1 ${style.progressBg}`} style={{ width: `${progress}%` }} />

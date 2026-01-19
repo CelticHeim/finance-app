@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import Toast from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import { createIncome } from '@/api/incomes.api';
 import type { CreateIncomeData } from '@/types/incomes.type';
 
@@ -20,7 +20,7 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
     });
 
     const [isLoading, setIsLoading] = useState(false);
-    const [toastConfig, setToastConfig] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const { showToast } = useToast();
 
     const incomeCategories = [
         { value: 'sueldo', label: 'Sueldo', color: '#10B981' },
@@ -42,12 +42,12 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
                 // discount: 0,
                 transaction_date: new Date().toISOString().split('T')[0],
             });
-            setToastConfig({ message: 'Ingreso registrado exitosamente', type: 'success' });
+            showToast('Ingreso registrado exitosamente', 'success');
             // Ejecutar callback después de éxito
             onSubmitSuccess?.();
         } catch (error) {
             console.error('Error submitting income:', error);
-            setToastConfig({ message: 'Error al registrar el ingreso', type: 'error' });
+            showToast('Error al registrar el ingreso', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -138,14 +138,6 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
             >
                 {isLoading ? 'Guardando...' : '+ Agregar Ingreso'}
             </button>
-
-            {toastConfig && (
-                <Toast
-                    message={toastConfig.message}
-                    type={toastConfig.type}
-                    onClose={() => setToastConfig(null)}
-                />
-            )}
         </form>
     );
 }

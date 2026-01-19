@@ -3,14 +3,20 @@ import { Modal } from '@/components/ui/Modal';
 import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
+import { useFinance } from '@/contexts/FinanceContext';
+import { useToast } from '@/contexts/ToastContext';
 import { completeTransaction } from '@/api/transaction.api';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionSelection();
+    const { refetchTransactions } = useFinance();
+    const { showToast } = useToast();
     const transaction = selectedTransaction;
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [applyDiscount, setApplyDiscount] = useState(false);
     const [discountValue, setDiscountValue] = useState<number | null>(null);
+    const [changeDate, setChangeDate] = useState(false);
+    const [newDate, setNewDate] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
 
     if (!transaction) return null;
@@ -183,13 +189,24 @@ export default function TransactionDetails() {
                             ? { discount: parseFloat(discountValue.toString()) }
                             : { discount: null };
                         
+                        if (changeDate && newDate) {
+                            payload.transaction_date = newDate;
+                        }
+                        
                         await completeTransaction(transaction.id, payload);
                         setShowConfirmDialog(false);
                         setApplyDiscount(false);
                         setDiscountValue(null);
-                        selectTransaction(null);
+                        setChangeDate(false);
+                        setNewDate('');
+                        showToast('Marcada como pagada', 'success', 3000, transaction.type as 'income' | 'expense' | 'installment' | 'fixed');
+                        await refetchTransactions();
+                        setTimeout(() => {
+                            selectTransaction(null);
+                        }, 300);
                     } catch (error) {
                         console.error('Error al marcar como pagado:', error);
+                        showToast('Error al marcar como pagada', 'error');
                     } finally {
                         setIsLoading(false);
                     }
@@ -198,6 +215,8 @@ export default function TransactionDetails() {
                     setShowConfirmDialog(false);
                     setApplyDiscount(false);
                     setDiscountValue(null);
+                    setChangeDate(false);
+                    setNewDate('');
                 }}
                 confirmText="Marcar como Pagado"
                 cancelText="Cancelar"

@@ -4,6 +4,8 @@ import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { getInstallment } from '@/api/installment.api';
 import { completeTransaction } from '@/api/transaction.api';
+import { useFinance } from '@/contexts/FinanceContext';
+import { useToast } from '@/contexts/ToastContext';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { TransactionRecord } from '@/types/transactions.type';
 
@@ -19,7 +21,11 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
     const [showConfirmDialog, setShowConfirmDialog] = useState<number | null>(null);
     const [applyDiscount, setApplyDiscount] = useState(false);
     const [discountValue, setDiscountValue] = useState<number | null>(null);
+    const [changeDate, setChangeDate] = useState(false);
+    const [newDate, setNewDate] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { refetchTransactions } = useFinance();
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (isOpen && installment) {
@@ -230,13 +236,22 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
                                 ? { discount: parseFloat(discountValue.toString()) }
                                 : { discount: null };
                             
+                            if (changeDate && newDate) {
+                                payload.transaction_date = newDate;
+                            }
+                            
                             await completeTransaction(showConfirmDialog, payload);
                             setShowConfirmDialog(null);
                             setApplyDiscount(false);
                             setDiscountValue(null);
+                            setChangeDate(false);
+                            setNewDate('');
+                            showToast('Transacción marcada como pagada', 'success');
+                            await refetchTransactions();
                             loadInstallmentDetails();
                         } catch (error) {
                             console.error('Error al marcar como pagado:', error);
+                            showToast('Error al marcar como pagada', 'error');
                         } finally {
                             setIsSubmitting(false);
                         }
@@ -245,6 +260,8 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
                         setShowConfirmDialog(null);
                         setApplyDiscount(false);
                         setDiscountValue(null);
+                        setChangeDate(false);
+                        setNewDate('');
                     }}
                     confirmText="Marcar como Pagado"
                     cancelText="Cancelar"

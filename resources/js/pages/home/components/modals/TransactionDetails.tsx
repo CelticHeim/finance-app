@@ -94,6 +94,34 @@ export default function TransactionDetails() {
                         </p>
                     </div>
 
+                    {/* Discount and Final Amount - only if discount was applied */}
+                    {(transaction.type === 'installment' || transaction.type === 'fixed') && transaction.discount && parseFloat(transaction.discount) > 0 && (
+                        <>
+                            {/* Discount */}
+                            <div className="mb-4">
+                                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                                    Descuento
+                                </label>
+                                <p className="text-lg font-medium text-gray-900 dark:text-white">
+                                    ${parseFloat(transaction.discount).toFixed(2)}
+                                </p>
+                            </div>
+
+                            {/* Final Amount */}
+                            <div className="mb-4">
+                                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                                    Monto Final
+                                </label>
+                                <p className={`text-2xl font-bold ${transaction.type === 'fixed'
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-purple-600 dark:text-purple-400'
+                                    }`}>
+                                    - ${parseFloat(transaction.final_amount).toFixed(2)}
+                                </p>
+                            </div>
+                        </>
+                    )}
+
                     {/* Date */}
                     <div className="mb-4">
                         <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">

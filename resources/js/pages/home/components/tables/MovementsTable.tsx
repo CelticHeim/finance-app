@@ -202,6 +202,12 @@ export default function MovementsTable() {
                             <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
                                 Monto
                             </th>
+                            <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                Descuento
+                            </th>
+                            <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                Monto Final
+                            </th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
                                 Fecha
                             </th>
@@ -262,6 +268,29 @@ export default function MovementsTable() {
                                     >
                                         {movement.type === 'income' ? '+' : '-'} ${parseFloat(movement.amount).toFixed(2)}
                                     </div>
+                                </td>
+                                <td className="py-4 px-4 text-right">
+                                    {(movement.type === 'installment' || movement.type === 'fixed') ? (
+                                        <div className="font-medium text-gray-700 dark:text-gray-300">
+                                            {movement.discount ? `$${parseFloat(movement.discount).toFixed(2)}` : '-'}
+                                        </div>
+                                    ) : (
+                                        <div className="text-gray-500 dark:text-gray-400">N/A</div>
+                                    )}
+                                </td>
+                                <td className="py-4 px-4 text-right">
+                                    {(movement.type === 'installment' || movement.type === 'fixed') ? (
+                                        <div
+                                            className={`font-bold text-lg ${movement.type === 'fixed'
+                                                ? 'text-blue-600 dark:text-blue-400'
+                                                : 'text-purple-600 dark:text-purple-400'
+                                                }`}
+                                        >
+                                            - ${parseFloat(movement.final_amount).toFixed(2)}
+                                        </div>
+                                    ) : (
+                                        <div className="text-gray-500 dark:text-gray-400">N/A</div>
+                                    )}
                                 </td>
                                 <td className="py-4 px-4">
                                     <div className="font-medium text-gray-700 dark:text-gray-300">

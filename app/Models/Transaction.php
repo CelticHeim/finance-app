@@ -23,6 +23,14 @@ class Transaction extends Model {
         'transaction_date' => 'datetime',
     ];
 
+    protected $appends = ['final_amount'];
+
+    // Accessors
+    public function getFinalAmountAttribute() {
+        $discount = $this->discount ? (float) $this->discount : 0;
+        return round((float) $this->amount - $discount, 2);
+    }
+
     // Relations
     public function transactionable() {
         return $this->morphTo();

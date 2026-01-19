@@ -155,25 +155,37 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
                                 {transactions.map((transaction) => (
                                     <div
                                         key={transaction.id}
-                                        className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-200 dark:border-gray-600"
+                                        className="bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-200 dark:border-gray-600"
                                     >
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                {transaction.description}
-                                            </p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                                {formatDate(transaction.transaction_date)}
-                                            </p>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 ml-3">
-                                            <div className="text-right mr-2">
-                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                                    ${parseFloat(transaction.amount).toFixed(2)}
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {transaction.description}
                                                 </p>
-                                                {getStatusBadge(transaction.status)}
+                                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                                    {formatDate(transaction.transaction_date)}
+                                                </p>
                                             </div>
-
+                                            {getStatusBadge(transaction.status)}
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
+                                            <div className="space-y-1">
+                                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                    Monto: <span className="font-semibold text-gray-900 dark:text-white">${parseFloat(transaction.amount).toFixed(2)}</span>
+                                                </p>
+                                                {transaction.discount && parseFloat(transaction.discount) > 0 && (
+                                                    <>
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                            Descuento: <span className="font-semibold text-gray-900 dark:text-white">${parseFloat(transaction.discount).toFixed(2)}</span>
+                                                        </p>
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                            Monto Final: <span className="font-semibold text-purple-600 dark:text-purple-400">${parseFloat(transaction.final_amount).toFixed(2)}</span>
+                                                        </p>
+                                                    </>
+                                                )}
+                                            </div>
+                                            
                                             {transaction.status === 'pending' && (
                                                 <Button
                                                     onClick={() => setShowConfirmDialog(transaction.id)}

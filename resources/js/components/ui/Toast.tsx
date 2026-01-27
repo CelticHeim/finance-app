@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Check, X, AlertCircle, AlertTriangle, X as XIcon } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 
 interface ToastProps {
     message: string;
     type?: 'success' | 'error' | 'info' | 'warning';
     transactionType?: 'income' | 'expense' | 'installment' | 'fixed';
     duration?: number;
-    Icon?: LucideIcon;
     onClose?: () => void;
 }
 
-export default function Toast({ message, type = 'success', duration = 3000, transactionType, Icon, onClose }: ToastProps) {
+export default function Toast({ message, type = 'success', duration = 3000, transactionType, onClose }: ToastProps) {
     const [isExiting, setIsExiting] = useState(false);
     const [progress, setProgress] = useState(100);
 
@@ -113,22 +110,21 @@ export default function Toast({ message, type = 'success', duration = 3000, tran
 
     const typeStyles = {
         success: {
-            Icon: Check,
+            label: '✓',
         },
         error: {
-            Icon: X,
+            label: '✕',
         },
         info: {
-            Icon: AlertCircle,
+            label: 'ℹ',
         },
         warning: {
-            Icon: AlertTriangle,
+            label: '⚠',
         },
     };
 
     const style = getTypeStyles();
-    const DefaultIcon = typeStyles[type].Icon;
-    const displayIcon = Icon || DefaultIcon;
+    const label = typeStyles[type].label;
 
     return (
         <div
@@ -139,16 +135,16 @@ export default function Toast({ message, type = 'success', duration = 3000, tran
             }`}
         >
             <div className="flex items-center gap-3 px-6 py-4">
-                {displayIcon && <displayIcon className="w-5 h-5 flex-shrink-0" />}
+                <span className="text-lg font-bold flex-shrink-0">{label}</span>
                 <span className="flex-1">{message}</span>
                 <button
                     onClick={() => {
                         setIsExiting(true);
                     }}
-                    className="ml-2 flex-shrink-0 hover:opacity-80 transition-opacity"
+                    className="ml-2 flex-shrink-0 text-xl font-bold hover:opacity-80 transition-opacity"
                     aria-label="Cerrar"
                 >
-                    <XIcon className="w-5 h-5" />
+                    ✕
                 </button>
             </div>
             <div className={`h-1 ${style.progressBg}`} style={{ width: `${progress}%` }} />

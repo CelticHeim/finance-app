@@ -109,37 +109,5 @@ class TransactionSeeder extends Seeder {
                 'status' => 'completed',
             ]);
         }
-
-        // ===== FIXED TRANSACTIONS =====
-        // Crear transacciones para cada Fixed para los próximos 3 meses
-        $fixedExpenses = Fixed::all();
-        
-        for ($month = 0; $month < 3; $month++) {
-            foreach ($fixedExpenses as $fixed) {
-                // Extract day from due_date
-                $dayOfMonth = $fixed->due_date->day;
-                
-                $transactionDate = $now->clone()
-                    ->addMonths($month)
-                    ->setDay($dayOfMonth);
-                
-                // Skip if the day doesn't exist in that month
-                if ($transactionDate->day != $dayOfMonth) {
-                    $transactionDate = $transactionDate->lastDayOfMonth();
-                }
-
-                Transaction::create([
-                    'amount' => $fixed->amount,
-                    'description' => $fixed->description,
-                    'discount' => 0,
-                    'transaction_date' => $transactionDate->format('Y-m-d'),
-                    'category' => $fixed->category,
-                    'type' => 'fixed',
-                    'status' => 'pending',
-                    'transactionable_id' => $fixed->id,
-                    'transactionable_type' => Fixed::class,
-                ]);
-            }
-        }
     }
 }

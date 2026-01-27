@@ -5,13 +5,16 @@ import Button from '@/components/ui/Button';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 import { useFinance } from '@/contexts/FinanceContext';
 import { useToast } from '@/contexts/ToastContext';
-import { completeTransaction } from '@/api/transaction.api';
+import { useTransaction } from '@/hooks/useTransaction';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionSelection();
-    const { refetchTransactions } = useFinance();
+    const { refetchTransactions, currentMonth, currentYear } = useFinance();
     const { showToast } = useToast();
+    const { completeTransactionByType } = useTransaction();
+
     const transaction = selectedTransaction;
+    
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [applyDiscount, setApplyDiscount] = useState(false);
     const [discountValue, setDiscountValue] = useState<number | null>(null);
@@ -48,11 +51,84 @@ export default function TransactionDetails() {
         });
     };
 
+    // Event Handlers
+    const handleModalOpenChange = (open: boolean) => {
+        if (!open) {
+            selectTransaction(null);
+        }
+    };
+
+    const handleMarkAsPaid = () => {
+        setShowConfirmDialog(true);
+    };
+
+    const handleCloseModal = () => {
+        selectTransaction(null);
+    };
+
+    const handleApplyDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplyDiscount(e.target.checked);
+    };
+
+    const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setDiscountValue(e.target.value === '' ? null : parseFloat(e.target.value));
+    };
+
+    const handleConfirm = async () => {
+        if (!transaction) return;
+
+        try {
+            setIsLoading(true);
+
+            // Construir la fecha basada en el mes/año del calendar
+            // Si el usuario cambió la fecha, usar esa; si no, usar el mes/año actual del calendar
+            let paymentDate: string;
+            if (changeDate && newDate) {
+                paymentDate = newDate;
+            } else {
+                // Usar el mes/año del calendar (día 1 para asegurar validez)
+                const baseDate = new Date(currentYear, currentMonth, 1);
+                paymentDate = baseDate.toISOString().split('T')[0];
+            }
+
+            const discount = applyDiscount && discountValue !== null && discountValue !== ''
+                ? parseFloat(discountValue.toString())
+                : null;
+
+            await completeTransactionByType(transaction, {
+                discount,
+                payment_date: paymentDate,
+            });
+
+            resetDialog();
+            showToast('Marcada como pagada', 'success', 3000, transaction.type as 'income' | 'expense' | 'installment' | 'fixed');
+            await refetchTransactions();
+            setTimeout(() => {
+                selectTransaction(null);
+            }, 300);
+        } catch (error) {
+            console.error('Error al marcar como pagado:', error);
+            showToast('Error al marcar como pagada', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCancel = () => {
+        resetDialog();
+    };
+
+    const resetDialog = () => {
+        setShowConfirmDialog(false);
+        setApplyDiscount(false);
+        setDiscountValue(null);
+        setChangeDate(false);
+        setNewDate('');
+    };
+
     return (
         <>
-            <Modal isOpen={!!transaction} onOpenChange={(open) => {
-                if (!open) selectTransaction(null);
-            }}>
+            <Modal isOpen={!!transaction} onOpenChange={handleModalOpenChange}>
                 <div className={`${colors.headerBg} border ${colors.headerBorder} px-6 py-4 rounded-t-lg`}>
                     <h2 className={`text-xl font-bold ${colors.headerText}`}>
                         Detalles de Transacción
@@ -153,7 +229,8 @@ export default function TransactionDetails() {
                                 </span>
                                 {(transaction.type === 'installment' || transaction.type === 'fixed') && transaction.status !== 'completed' && (
                                     <Button
-                                        onClick={() => setShowConfirmDialog(true)}
+                                        onClick={handleMarkAsPaid}
+                                        disabled={isLoading}
                                         style="success"
                                         size="sm"
                                     >
@@ -167,7 +244,7 @@ export default function TransactionDetails() {
 
                 <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-6 py-4 flex gap-2">
                     <Button
-                        onClick={() => selectTransaction(null)}
+                        onClick={handleCloseModal}
                         style="cancel"
                         className="flex-1"
                     >
@@ -180,44 +257,8 @@ export default function TransactionDetails() {
                 isOpen={showConfirmDialog}
                 onOpenChange={setShowConfirmDialog}
                 title="Confirmar Pago"
-                onConfirm={async () => {
-                    if (!transaction) return;
-                    
-                    try {
-                        setIsLoading(true);
-                        const payload = applyDiscount && discountValue !== null && discountValue !== '' 
-                            ? { discount: parseFloat(discountValue.toString()) }
-                            : { discount: null };
-                        
-                        if (changeDate && newDate) {
-                            payload.transaction_date = newDate;
-                        }
-                        
-                        await completeTransaction(transaction.id, payload);
-                        setShowConfirmDialog(false);
-                        setApplyDiscount(false);
-                        setDiscountValue(null);
-                        setChangeDate(false);
-                        setNewDate('');
-                        showToast('Marcada como pagada', 'success', 3000, transaction.type as 'income' | 'expense' | 'installment' | 'fixed');
-                        await refetchTransactions();
-                        setTimeout(() => {
-                            selectTransaction(null);
-                        }, 300);
-                    } catch (error) {
-                        console.error('Error al marcar como pagado:', error);
-                        showToast('Error al marcar como pagada', 'error');
-                    } finally {
-                        setIsLoading(false);
-                    }
-                }}
-                onCancel={() => {
-                    setShowConfirmDialog(false);
-                    setApplyDiscount(false);
-                    setDiscountValue(null);
-                    setChangeDate(false);
-                    setNewDate('');
-                }}
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
                 confirmText="Marcar como Pagado"
                 cancelText="Cancelar"
             >
@@ -227,14 +268,14 @@ export default function TransactionDetails() {
                         <span className="font-bold">{transaction?.description}</span> por{' '}
                         <span className="font-bold text-green-600 dark:text-green-400">${parseFloat(transaction?.amount || '0').toFixed(2)}</span>?
                     </p>
-                    
+
                     {/* Checkbox para aplicar descuento */}
                     <div className="flex items-center gap-2">
                         <input
                             type="checkbox"
                             id="applyDiscount"
                             checked={applyDiscount}
-                            onChange={(e) => setApplyDiscount(e.target.checked)}
+                            onChange={handleApplyDiscountChange}
                             disabled={isLoading}
                             className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 cursor-pointer"
                         />
@@ -242,7 +283,7 @@ export default function TransactionDetails() {
                             Aplicar descuento
                         </label>
                     </div>
-                    
+
                     {/* Campo descuento - solo se muestra si el checkbox está activo */}
                     {applyDiscount && (
                         <div>
@@ -254,7 +295,7 @@ export default function TransactionDetails() {
                                 type="number"
                                 placeholder="Ingresa el monto del descuento"
                                 value={discountValue ?? ''}
-                                onChange={(e) => setDiscountValue(e.target.value === '' ? null : parseFloat(e.target.value))}
+                                onChange={handleDiscountChange}
                                 disabled={isLoading}
                                 step="0.01"
                                 min="0"

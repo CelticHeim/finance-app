@@ -52,24 +52,44 @@ class FinanceService {
             ->get();
 
         $fixeds = Fixed::all();
-        $unpaidFixeds = array_diff(
+        // Obtener IDs de fixeds que ya tienen transacción en este mes/año
+        $paidFixedIds = $transactions
+            ->where('type', 'fixed')
+            ->pluck('transactionable_id')
+            ->toArray();
+
+        // Calcular fixeds pendientes (sin transacción en este mes/año)
+        $unpaidFixedIds = array_diff(
             $fixeds->pluck('id')->toArray(),
-            $transactions->where('type', 'fixed')->pluck('transactionable_id')->toArray()
+            $paidFixedIds
         );
 
-        $pendingFixedTransactions = collect($unpaidFixeds)->map(function ($fixedId) use ($month, $year, $fixeds) {
+        // Generar objetos temporales para fixeds pendientes
+        $pendingFixedTransactions = collect($unpaidFixedIds)->map(function ($fixedId) use ($month, $year, $fixeds) {
             $fixed = $fixeds->firstWhere('id', $fixedId);
-            $day = $fixed->due_date?->day ?? 1;
-            $transactionDate = Carbon::createFromDate($year, $month, $day, 'UTC')->toDateString();
+            
+            // Usar due_date del Fixed como día del mes
+            $dueDay = is_numeric($fixed->due_date) 
+                ? (int)$fixed->due_date 
+                : $fixed->due_date->day ?? 1;
+            
+            $transactionDate = Carbon::createFromDate($year, $month, $dueDay)->toDateString();
 
             return (object) [
-                'id' => uuid_create(),
+                'id' => null, // No existe en DB aún
                 'type' => 'fixed',
                 'description' => $fixed->description,
                 'category' => $fixed->category,
-                'amount' => $fixed->amount,
+                'amount' => (string) $fixed->amount,
+                'discount' => '0',
                 'transaction_date' => $transactionDate,
                 'status' => 'pending',
+                'transactionable_id' => $fixedId, // ID REAL del Fixed
+                'transactionable_type' => 'App\Models\Fixed',
+                'created_at' => null,
+                'updated_at' => null,
+                'deleted_at' => null,
+                'is_placeholder' => true, // Indicador: no existe en DB
             ];
         });
 

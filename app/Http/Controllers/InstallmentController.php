@@ -24,7 +24,7 @@ class InstallmentController extends Controller {
         $installment->category = $validated['category'];
         $installment->due_date = $validated['due_date'];
         $installment->number_of_installments = $validated['number_of_installments'];
-        
+
         $installment->status = 'pending';
         $installment->save();
 
@@ -57,5 +57,29 @@ class InstallmentController extends Controller {
             'message' => 'Detalle del gasto a cuotas',
             'data' => $installment->load('transactions'),
         ]);
+    }
+
+    public function complete(Request $request, Transaction $transaction) {
+        $validated = $request->validate([
+            'discount' => 'nullable|numeric',
+            'payment_date' => 'required|date'
+        ]);
+
+        if ($transaction->status === 'completed') {
+            return response()->json([
+                'message' => 'La transacción ya ha sido completada',
+                'data' => $transaction,
+            ], 409);
+        }
+
+        $transaction->discount = $validated['discount'] ?? 0;
+        $transaction->transaction_date = $validated['payment_date'];
+        $transaction->status = 'completed';
+        $transaction->save();
+
+        return response()->json([
+            'message' => "Transacción de cuota completada exitosamente",
+            'data' => $transaction->refresh(),
+        ], 200);
     }
 }

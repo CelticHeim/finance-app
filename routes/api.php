@@ -26,6 +26,18 @@ Route::prefix('finances')->controller(FinanceController::class)->group(function 
 
 Route::apiResource('incomes', IncomeController::class);
 Route::apiResource('expenses', ExpenseController::class);
-Route::apiResource('fixeds', FixedController::class);
-Route::apiResource('installments', InstallmentController::class);
-Route::post('transactions/{transaction}/complete', [TransactionController::class, 'complete']);
+
+Route::controller(FixedController::class)->group(function () {
+    Route::post('fixeds', 'store');
+    Route::post('fixeds/{fixed}/complete', 'complete');
+});
+
+Route::controller(InstallmentController::class)->group(function () {
+    Route::post('installments', 'store');
+    Route::get('installments/{installment}', 'show');
+    Route::post('installments/{transaction}/complete', 'complete');
+});
+
+Route::controller(TransactionController::class)->group(function () {
+    Route::post('transactions/{transaction}/complete', 'complete');
+});

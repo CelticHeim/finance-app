@@ -20,3 +20,19 @@ export const getInstallment = async (id: number) => {
         throw error;
     }
 };
+
+export const completeInstallment = async (
+    transactionId: number,
+    data?: { discount?: number | null; payment_date: string }
+) => {
+    try {
+        const response = await api.post(
+            `/installments/${transactionId}/complete`,
+            data || { payment_date: new Date().toISOString().split('T')[0] }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error completing installment transaction:', error);
+        throw error;
+    }
+};

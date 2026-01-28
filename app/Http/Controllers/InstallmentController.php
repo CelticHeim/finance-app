@@ -62,7 +62,7 @@ class InstallmentController extends Controller {
     public function complete(Request $request, Transaction $transaction) {
         $validated = $request->validate([
             'discount' => 'nullable|numeric',
-            'payment_date' => 'required|date'
+            // 'payment_date' => 'required|date'
         ]);
 
         if ($transaction->status === 'completed') {
@@ -73,7 +73,7 @@ class InstallmentController extends Controller {
         }
 
         $transaction->discount = $validated['discount'] ?? 0;
-        $transaction->transaction_date = $validated['payment_date'];
+        // $transaction->transaction_date = $validated['payment_date'];
         $transaction->status = 'completed';
         $transaction->save();
 

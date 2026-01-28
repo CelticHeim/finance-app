@@ -9,6 +9,7 @@ import TransactionDetails from './components/modals/TransactionDetails';
 import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
 import { TransactionSelectionProvider } from '../../contexts/TransactionSelectionContext';
 import { CacheInvalidationProvider, useCacheInvalidation } from '../../contexts/CacheInvalidationContext';
+import ToastContainer from '@/components/ui/ToastContainer';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
@@ -117,6 +118,7 @@ export default function Home() {
             <TransactionSelectionProvider>
                 <CacheInvalidationProvider>
                     <HomeContent />
+                    <ToastContainer />
                 </CacheInvalidationProvider>
             </TransactionSelectionProvider>
         </FinanceProvider>

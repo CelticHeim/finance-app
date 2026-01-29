@@ -33,7 +33,8 @@ export default function MovementsTable() {
             const typesString = selectedTypes.length > 0 ? selectedTypes.join(',') : '';
             const response = await getTransactions(currentPage, perPage, selectedTypes.length > 0 ? { types: typesString } : {});
             return response?.data ?? null;
-        }
+        },
+        placeholderData: (previousData) => previousData
     });
 
     useEffect(() => {
@@ -267,14 +268,6 @@ export default function MovementsTable() {
                     </tbody>
                 </table>
             </div>
-
-            {/* {filteredData.length === 0 && (
-                <div className="text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400">
-                        No hay movimientos registrados
-                    </p>
-                </div>
-            )} */}
 
             {/* Pagination */}
             <Pagination

@@ -38,7 +38,7 @@ class FinanceController extends Controller {
         $month = $request->query('month');
         $year = $request->query('year');
         $limit = $request->query('limit', 10);
-        $types = $request->query('types'); // 'income,expense' format
+        $types = $request->query('types', ''); // 'income,expense' format
 
         $transactions = Transaction::with('transactionable')
             ->byMonthAndYear($month, $year)

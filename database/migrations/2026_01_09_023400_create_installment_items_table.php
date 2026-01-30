@@ -10,6 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->decimal('amount', 15, 2);
             $table->date('payment_date');
+            $table->dateTime('paid_at')->nullable();
             $table->string('status')->default('pending');
             $table->foreignId('installment_id')->constrained('installments')->onDelete('cascade');
             $table->timestamps();

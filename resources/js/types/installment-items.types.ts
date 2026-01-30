@@ -2,6 +2,7 @@ export interface InstallmentItem {
     id: number;
     installment_id: number;
     payment_date: string;
+    paid_at: string | null;
     status: 'pending' | 'completed';
     created_at: string;
     updated_at: string;

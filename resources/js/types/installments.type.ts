@@ -1,3 +1,5 @@
+import type { InstallmentItem } from "./installment-items.types";
+
 export type CreateInstallmentData = {
     amount: number;
     description: string;
@@ -15,6 +17,7 @@ export type InstallmentRecord = {
     number_of_installments: number;
     current_installment: number;
     status: 'pending' | 'paid' | 'overdue';
+    items?: InstallmentItem[];
     created_at: string;
     updated_at: string;
     deleted_at: string | null;

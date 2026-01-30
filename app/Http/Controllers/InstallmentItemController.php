@@ -32,20 +32,25 @@ class InstallmentItemController extends Controller {
         }
 
         $installmentItem->status = 'completed';
+        $installmentItem->paid_at = Carbon::now();
         $installmentItem->save();
 
         $installment = $installmentItem->installment;
 
-        $transaction = Transaction::create([
+        Transaction::create([
             'amount' => $installment->amount / $installment->number_of_installments,
             'description' => $installment->description,
             'discount' => 0,
-            'transaction_date' => Carbon::now(),
+            'transaction_date' => $installmentItem->payment_date,
             'category' => $installment->category,
             'type' => 'installment',
             'status' => 'completed',
             'installment_item_id' => $installmentItem->id,
         ]);
+
+        $completedCount = $installment->items()->where('status', 'completed')->count();
+        $installment->current_installment = $completedCount;
+        $installment->save();
 
         return response()->json([
             'message' => 'Cuota marcada como completada exitosamente',

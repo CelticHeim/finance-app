@@ -44,7 +44,7 @@ class FinanceService {
     }
 
     public function getInstallments() {
-        return Installment::where('status', 'pending')->get();
+        return Installment::where('status', 'pending')->with('items')->get();
     }
 
     public function getCalendarTransactions($month, $year) {
@@ -91,8 +91,8 @@ class FinanceService {
                 'category' => $item->installment->category,
                 'amount' => (string) $item->amount,
                 'discount' => '0',
-                'transaction_date' => $item->payment_date instanceof \Carbon\Carbon 
-                    ? $item->payment_date->toDateString() 
+                'transaction_date' => $item->payment_date instanceof \Carbon\Carbon
+                    ? $item->payment_date->toDateString()
                     : $item->payment_date,
                 'status' => 'pending',
                 'installment_item_id' => $item->id,

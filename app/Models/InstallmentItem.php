@@ -12,12 +12,14 @@ class InstallmentItem extends Model {
     protected $fillable = [
         'amount',
         'payment_date',
+        'paid_at',
         'status',
         'installment_id',
     ];
 
     protected $casts = [
         'payment_date' => 'date',
+        'paid_at' => 'datetime',
     ];
 
     public function installment(): BelongsTo {

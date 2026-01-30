@@ -9,12 +9,12 @@ import { useTransaction } from '@/hooks/useTransaction';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionSelection();
-    const { refetchTransactions, currentMonth, currentYear } = useFinance();
+    const { refetchTransactions, refetchInstallments, currentMonth, currentYear } = useFinance();
     const { showToast } = useToast();
     const { completeTransactionByType } = useTransaction();
 
     const transaction = selectedTransaction;
-    
+
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [applyDiscount, setApplyDiscount] = useState(false);
     const [discountValue, setDiscountValue] = useState<number | null>(null);
@@ -102,7 +102,13 @@ export default function TransactionDetails() {
 
             resetDialog();
             showToast('Marcada como pagada', 'success', 3000, transaction.type as 'income' | 'expense' | 'installment' | 'fixed');
+            
             await refetchTransactions();
+            
+            if (transaction.type === 'installment') {
+                await refetchInstallments();
+            }
+            
             setTimeout(() => {
                 selectTransaction(null);
             }, 300);
@@ -238,6 +244,18 @@ export default function TransactionDetails() {
                                     </Button>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {/* Paid At - Only for installment type */}
+                    {transaction.type === 'installment' && transaction.installment_item?.paid_at && (
+                        <div className="mb-4">
+                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                                Marcado como Pagado
+                            </label>
+                            <p className="text-gray-900 dark:text-gray-200">
+                                {formatDate(transaction.installment_item.paid_at)}
+                            </p>
                         </div>
                     )}
                 </div>

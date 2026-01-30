@@ -8,6 +8,8 @@ import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
 import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
 import { CalendarProvider, useCalendar } from './contexts/CalendarContext';
+import { FixedsProvider, useFixeds } from './contexts/FixedsContext';
+import { InstallmentsProvider, useInstallments } from './contexts/InstallmentsContext';
 import { TransactionSelectionProvider } from '../../contexts/TransactionSelectionContext';
 import { CacheInvalidationProvider, useCacheInvalidation } from '../../contexts/CacheInvalidationContext';
 import ToastContainer from '@/components/ui/ToastContainer';
@@ -26,13 +28,25 @@ function HomeContent() {
     } = useCalendar();
 
     const {
+        loadFixeds,
+        refetchFixeds,
+    } = useFixeds();
+
+    const {
+        loadInstallments,
+        refetchInstallments,
+    } = useInstallments();
+
+    const {
         onTransactionAdded,
     } = useCacheInvalidation();
 
     useEffect(() => {
         loadInitialData();
         loadCalendarData();
-    }, [loadInitialData, loadCalendarData]);
+        loadFixeds();
+        loadInstallments();
+    }, [loadInitialData, loadCalendarData, loadFixeds, loadInstallments]);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -53,6 +67,8 @@ function HomeContent() {
                                 onTransactionAdded();
                                 refetchTransactionsFinance();
                                 refetchTransactionsCalendar();
+                                refetchFixeds();
+                                refetchInstallments();
                             }} />
                         </div>
                     </div>
@@ -120,12 +136,16 @@ export default function Home() {
     return (
         <FinanceProvider>
             <CalendarProvider>
-                <TransactionSelectionProvider>
-                    <CacheInvalidationProvider>
-                        <HomeContent />
-                        <ToastContainer />
-                    </CacheInvalidationProvider>
-                </TransactionSelectionProvider>
+                <FixedsProvider>
+                    <InstallmentsProvider>
+                        <TransactionSelectionProvider>
+                            <CacheInvalidationProvider>
+                                <HomeContent />
+                                <ToastContainer />
+                            </CacheInvalidationProvider>
+                        </TransactionSelectionProvider>
+                    </InstallmentsProvider>
+                </FixedsProvider>
             </CalendarProvider>
         </FinanceProvider>
     );

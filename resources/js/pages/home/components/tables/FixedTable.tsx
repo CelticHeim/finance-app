@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { useFinance } from '@/contexts/FinanceContext';
+import { useFixeds } from '../../contexts/FixedsContext';
 import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
 
 export default function FixedTable() {
-    const { fixeds, refetchFixeds } = useFinance();
+    const { fixeds, refetchFixeds } = useFixeds();
     const { subscribeToFixeds } = useCacheInvalidation();
 
     // Cargar datos cuando el componente se monta

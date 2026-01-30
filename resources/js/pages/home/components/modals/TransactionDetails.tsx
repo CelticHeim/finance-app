@@ -3,14 +3,14 @@ import { Modal } from '@/components/ui/Modal';
 import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
-import { useFinance } from '@/contexts/FinanceContext';
 import { useCalendar } from '../../contexts/CalendarContext';
+import { useInstallments } from '../../contexts/InstallmentsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransaction } from '@/hooks/useTransaction';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionSelection();
-    const { refetchInstallments } = useFinance();
+    const { refetchInstallments } = useInstallments();
     const { refetchTransactions, currentMonth, currentYear } = useCalendar();
     const { showToast } = useToast();
     const { completeTransactionByType } = useTransaction();

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useFinance } from '@/contexts/FinanceContext';
+import { useInstallments } from '../../contexts/InstallmentsContext';
 import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { InstallmentItem } from '@/types/installment-items.types';
 
 export default function InstallmentTable() {
-    const { installments, refetchInstallments } = useFinance();
+    const { installments, refetchInstallments } = useInstallments();
     const { subscribeToInstallments } = useCacheInvalidation();
     const { selectTransaction } = useTransactionSelection();
     const [expandedInstallmentId, setExpandedInstallmentId] = useState<number | null>(null);

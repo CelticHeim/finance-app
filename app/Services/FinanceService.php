@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Fixed;
 use App\Models\Installment;
+use App\Models\InstallmentItem;
 use App\Models\Transaction;
 use Carbon\Carbon;
 
@@ -51,32 +52,20 @@ class FinanceService {
             ->byMonthAndYear($month, $year)
             ->get();
 
+        // Obtener que fixeds no existen en la colección de transacciones
         $fixeds = Fixed::all();
-        // Obtener IDs de fixeds que ya tienen transacción en este mes/año
-        $paidFixedIds = $transactions
-            ->where('type', 'fixed')
-            ->pluck('transactionable_id')
-            ->toArray();
 
-        // Calcular fixeds pendientes (sin transacción en este mes/año)
-        $unpaidFixedIds = array_diff(
-            $fixeds->pluck('id')->toArray(),
-            $paidFixedIds
-        );
+        $paidFixedIds = $transactions->where('type', 'fixed')->pluck('transactionable_id')->toArray();
+        $unpaidFixedIds = array_diff($fixeds->pluck('id')->toArray(), $paidFixedIds);
 
-        // Generar objetos temporales para fixeds pendientes
-        $pendingFixedTransactions = collect($unpaidFixedIds)->map(function ($fixedId) use ($month, $year, $fixeds) {
+        // Generar objetos de transacciones temporales
+        $transactionTemp = [];
+        foreach ($unpaidFixedIds as $fixedId) {
             $fixed = $fixeds->firstWhere('id', $fixedId);
-            
-            // Usar due_date del Fixed como día del mes
-            $dueDay = is_numeric($fixed->due_date) 
-                ? (int)$fixed->due_date 
-                : $fixed->due_date->day ?? 1;
-            
-            $transactionDate = Carbon::createFromDate($year, $month, $dueDay)->toDateString();
+            $transactionDate = Carbon::createFromDate($year, $month, $fixed->due_date->day)->toDateString();
 
-            return (object) [
-                'id' => null, // No existe en DB aún
+            $transactionTemp[] = (object) [
+                'id' => null,
                 'type' => 'fixed',
                 'description' => $fixed->description,
                 'category' => $fixed->category,
@@ -84,15 +73,39 @@ class FinanceService {
                 'discount' => '0',
                 'transaction_date' => $transactionDate,
                 'status' => 'pending',
-                'transactionable_id' => $fixedId, // ID REAL del Fixed
+                'transactionable_id' => $fixedId,
                 'transactionable_type' => 'App\Models\Fixed',
                 'created_at' => null,
                 'updated_at' => null,
                 'deleted_at' => null,
-                'is_placeholder' => true, // Indicador: no existe en DB
+                'is_placeholder' => true,
             ];
-        });
+        }
 
-        return $transactions->concat($pendingFixedTransactions);
+        $items = InstallmentItem::where('status', 'pending')
+            ->with('installment')
+            ->byMonthAndYear($month, $year)
+            ->get();
+
+        foreach ($items as $item) {
+            $transactionTemp[] = (object) [
+                'id' => null,
+                'type' => 'installment',
+                'description' => $item->installment->description,
+                'category' => $item->installment->category,
+                'amount' => (string) $item->amount,
+                'discount' => '0',
+                'transaction_date' => $item->payment_date,
+                'status' => 'pending',
+                'transactionable_id' => $item->installment->id,
+                'transactionable_type' => 'App\Models\Installment',
+                'created_at' => null,
+                'updated_at' => null,
+                'deleted_at' => null,
+                'is_placeholder' => true,
+            ];
+        }
+
+        return collect($transactionTemp)->concat($transactions);
     }
 }

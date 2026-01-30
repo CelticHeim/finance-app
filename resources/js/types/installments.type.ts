@@ -16,7 +16,7 @@ export type InstallmentRecord = {
     due_date: string;
     number_of_installments: number;
     current_installment: number;
-    status: 'pending' | 'paid' | 'overdue';
+    status: 'pending' | 'completed' | 'overdue';
     items?: InstallmentItem[];
     created_at: string;
     updated_at: string;

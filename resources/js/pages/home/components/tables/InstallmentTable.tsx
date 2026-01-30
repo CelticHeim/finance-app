@@ -82,6 +82,9 @@ export default function InstallmentTable() {
                             <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
                                 Cuotas
                             </th>
+                            <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
+                                Estado
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,11 +123,14 @@ export default function InstallmentTable() {
                                         <td className="py-4 px-4 text-center text-gray-600 dark:text-gray-400">
                                             {installment.current_installment}/{installment.number_of_installments}
                                         </td>
+                                        <td className="py-4 px-4 text-center">
+                                            {getStatusBadge(installment.status)}
+                                        </td>
                                     </tr>
 
                                     {expandedInstallmentId === installment.id && installment.items && (
                                         <tr>
-                                            <td colSpan={5} className="bg-gray-50 dark:bg-gray-900/50">
+                                            <td colSpan={6} className="bg-gray-50 dark:bg-gray-900/50">
                                                 <div className="px-4 py-3">
                                                     <table className="w-full">
                                                         <thead>
@@ -178,7 +184,7 @@ export default function InstallmentTable() {
                         ) : (
                             <tr>
                                 <td
-                                    colSpan={5}
+                                    colSpan={6}
                                     className="py-8 px-4 text-center text-gray-500 dark:text-gray-400"
                                 >
                                     No hay pagos a plazos registrados

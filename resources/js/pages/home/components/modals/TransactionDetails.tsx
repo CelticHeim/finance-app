@@ -4,17 +4,15 @@ import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { useTransaction as useTransactionContext } from '../../contexts/TransactionContext';
 import { useCalendarQuery } from '../../hooks/useCalendarQuery';
-import { useInstallmentsQuery } from '../../hooks/useInstallmentsQuery';
 import { useToast } from '@/contexts/ToastContext';
-import { useTransaction } from '@/hooks/useTransaction';
+import { useCompleteTransaction } from '../../hooks/useCompleteTransaction';
 import { formatDate as formatDateHelper } from '@/helpers/date-format';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionContext();
-    const { refetchInstallments } = useInstallmentsQuery();
-    const { refetchTransactions, currentMonth, currentYear } = useCalendarQuery();
+    const { currentMonth, currentYear } = useCalendarQuery();
     const { showToast } = useToast();
-    const { completeTransactionByType } = useTransaction();
+    const completeMutation = useCompleteTransaction();
 
     const transaction = selectedTransaction;
 
@@ -23,7 +21,6 @@ export default function TransactionDetails() {
     const [discountValue, setDiscountValue] = useState<number | null>(null);
     const [changeDate, setChangeDate] = useState(false);
     const [newDate, setNewDate] = useState<string>('');
-    const [isLoading, setIsLoading] = useState(false);
 
     if (!transaction) return null;
 
@@ -80,15 +77,10 @@ export default function TransactionDetails() {
         if (!transaction) return;
 
         try {
-            setIsLoading(true);
-
-            // Construir la fecha basada en el mes/año del calendar
-            // Si el usuario cambió la fecha, usar esa; si no, usar el mes/año actual del calendar
             let paymentDate: string;
             if (changeDate && newDate) {
                 paymentDate = newDate;
             } else {
-                // Usar el mes/año del calendar (día 1 para asegurar validez)
                 const baseDate = new Date(currentYear, currentMonth, 1);
                 paymentDate = baseDate.toISOString().split('T')[0];
             }
@@ -97,19 +89,16 @@ export default function TransactionDetails() {
                 ? parseFloat(discountValue.toString())
                 : null;
 
-            await completeTransactionByType(transaction, {
-                discount,
-                payment_date: paymentDate,
+            await completeMutation.mutateAsync({
+                transaction,
+                payload: {
+                    discount,
+                    payment_date: paymentDate,
+                },
             });
 
             resetDialog();
             showToast('Marcada como pagada', 'success', 3000, transaction.type as 'income' | 'expense' | 'installment' | 'fixed');
-
-            await refetchTransactions();
-
-            if (transaction.type === 'installment') {
-                await refetchInstallments();
-            }
 
             setTimeout(() => {
                 selectTransaction(null);
@@ -117,8 +106,6 @@ export default function TransactionDetails() {
         } catch (error) {
             console.error('Error al marcar como pagado:', error);
             showToast('Error al marcar como pagada', 'error');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -238,7 +225,7 @@ export default function TransactionDetails() {
                                 {(transaction.type === 'installment' || transaction.type === 'fixed') && transaction.status !== 'completed' && (
                                     <Button
                                         onClick={handleMarkAsPaid}
-                                        disabled={isLoading}
+                                        disabled={completeMutation.isPending}
                                         style="success"
                                         size="sm"
                                     >
@@ -296,7 +283,7 @@ export default function TransactionDetails() {
                             id="applyDiscount"
                             checked={applyDiscount}
                             onChange={handleApplyDiscountChange}
-                            disabled={isLoading}
+                            disabled={completeMutation.isPending}
                             className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 cursor-pointer"
                         />
                         <label htmlFor="applyDiscount" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -316,7 +303,7 @@ export default function TransactionDetails() {
                                 placeholder="Ingresa el monto del descuento"
                                 value={discountValue ?? ''}
                                 onChange={handleDiscountChange}
-                                disabled={isLoading}
+                                disabled={completeMutation.isPending}
                                 step="0.01"
                                 min="0"
                                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"

@@ -44,7 +44,7 @@ class FinanceService {
     }
 
     public function getInstallments() {
-        return Installment::where('status', 'pending')->with('items')->get();
+        return Installment::with('items')->get();
     }
 
     public function getCalendarTransactions($month, $year) {

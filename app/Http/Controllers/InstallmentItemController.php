@@ -50,6 +50,11 @@ class InstallmentItemController extends Controller {
 
         $completedCount = $installment->items()->where('status', 'completed')->count();
         $installment->current_installment = $completedCount;
+
+        if ($completedCount === $installment->number_of_installments) {
+            $installment->status = 'completed';
+        }
+
         $installment->save();
 
         return response()->json([

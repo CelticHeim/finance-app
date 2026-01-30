@@ -3,15 +3,15 @@ import { Modal } from '@/components/ui/Modal';
 import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { useTransaction as useTransactionContext } from '../../contexts/TransactionContext';
-import { useCalendar } from '../../contexts/CalendarContext';
-import { useInstallments } from '../../contexts/InstallmentsContext';
+import { useCalendarQuery } from '../../hooks/useCalendarQuery';
+import { useInstallmentsQuery } from '../../hooks/useInstallmentsQuery';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransaction } from '@/hooks/useTransaction';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionContext();
-    const { refetchInstallments } = useInstallments();
-    const { refetchTransactions, currentMonth, currentYear } = useCalendar();
+    const { refetchInstallments } = useInstallmentsQuery();
+    const { refetchTransactions, currentMonth, currentYear } = useCalendarQuery();
     const { showToast } = useToast();
     const { completeTransactionByType } = useTransaction();
 

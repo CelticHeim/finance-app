@@ -1,26 +1,20 @@
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import { useToast } from '@/contexts/ToastContext';
-import { createIncome } from '@/api/incomes.api';
+import { useCreateIncome } from '../../hooks/useMutations';
 import type { CreateIncomeData } from '@/types/incomes.type';
 
-interface IncomeFormProps {
-    onSubmitSuccess?: () => void;
-}
-
-export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
+export default function IncomeForm() {
     const { register, handleSubmit, reset, watch } = useForm<CreateIncomeData>({
         defaultValues: {
             amount: '',
             category: 'sueldo',
             description: 'Sueldo semanal',
-            // discount: 0,
             transaction_date: new Date().toISOString().split('T')[0],
         },
     });
 
-    const [isLoading, setIsLoading] = useState(false);
     const { showToast } = useToast();
+    const createIncomeMutation = useCreateIncome();
 
     const incomeCategories = [
         { value: 'sueldo', label: 'Sueldo', color: '#10B981' },
@@ -33,23 +27,17 @@ export default function IncomeForm({ onSubmitSuccess }: IncomeFormProps) {
 
     const onSubmit = async (data: CreateIncomeData) => {
         try {
-            setIsLoading(true);
-            await createIncome(data);
+            await createIncomeMutation.mutateAsync(data);
             reset({
                 amount: '',
                 category: 'sueldo',
                 description: 'Sueldo semanal',
-                // discount: 0,
                 transaction_date: new Date().toISOString().split('T')[0],
             });
             showToast('Ingreso registrado exitosamente', 'success');
-            // Ejecutar callback después de éxito
-            onSubmitSuccess?.();
         } catch (error) {
             console.error('Error submitting income:', error);
             showToast('Error al registrar el ingreso', 'error');
-        } finally {
-            setIsLoading(false);
         }
     };
 

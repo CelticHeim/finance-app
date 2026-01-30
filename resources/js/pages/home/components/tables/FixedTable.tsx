@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useFixeds } from '../../contexts/FixedsContext';
+import { useFixedsQuery } from '../../hooks/useFixedsQuery';
 
 export default function FixedTable() {
-    const { fixeds, refetchFixeds } = useFixeds();
+    const { fixeds, refetchFixeds } = useFixedsQuery();
 
     useEffect(() => {
         refetchFixeds();

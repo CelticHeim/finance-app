@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import RegistroForm from './components/forms/RegistroForm';
 import Calendar from './components/calendar/Calendar';
 import BalanceIndicator from './components/BalanceIndicator';
@@ -6,33 +6,11 @@ import MovementsTable from './components/tables/MovementsTable';
 import InstallmentTable from './components/tables/InstallmentTable';
 import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
-import { CalendarProvider, useCalendar } from './contexts/CalendarContext';
-import { FixedsProvider, useFixeds } from './contexts/FixedsContext';
-import { InstallmentsProvider, useInstallments } from './contexts/InstallmentsContext';
 import { TransactionProvider } from './contexts/TransactionContext';
 import ToastContainer from '@/components/ui/ToastContainer';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
-
-    const {
-        loadCalendarData,
-        refetchTransactions: refetchTransactionsCalendar,
-    } = useCalendar();
-
-    const {
-        loadFixeds,
-    } = useFixeds();
-
-    const {
-        loadInstallments,
-    } = useInstallments();
-
-    useEffect(() => {
-        loadCalendarData();
-        loadFixeds();
-        loadInstallments();
-    }, [loadCalendarData, loadFixeds, loadInstallments]);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -49,9 +27,7 @@ function HomeContent() {
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
-                            <RegistroForm onDataUpdated={() => {
-                                refetchTransactionsCalendar();
-                            }} />
+                            <RegistroForm />
                         </div>
                     </div>
 
@@ -116,16 +92,10 @@ function HomeContent() {
 // Componente principal que provee los contextos
 export default function Home() {
     return (
-        <CalendarProvider>
-            <FixedsProvider>
-                <InstallmentsProvider>
-                    <TransactionProvider>
-                        <HomeContent />
-                        <ToastContainer />
-                    </TransactionProvider>
-                </InstallmentsProvider>
-            </FixedsProvider>
-        </CalendarProvider>
+        <TransactionProvider>
+            <HomeContent />
+            <ToastContainer />
+        </TransactionProvider>
     );
 }
 

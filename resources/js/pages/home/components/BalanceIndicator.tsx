@@ -1,7 +1,7 @@
-import { useCalendar } from '../contexts/CalendarContext';
+import { useCalendarQuery } from '../hooks/useCalendarQuery';
 
 export default function BalanceIndicator() {
-    const { summary } = useCalendar();
+    const { summary } = useCalendarQuery();
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

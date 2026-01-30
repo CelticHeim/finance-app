@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useInstallments } from '../../contexts/InstallmentsContext';
+import { useInstallmentsQuery } from '../../hooks/useInstallmentsQuery';
 import { useTransaction } from '../../contexts/TransactionContext';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { InstallmentItem } from '@/types/installment-items.types';
 
 export default function InstallmentTable() {
-    const { installments, refetchInstallments } = useInstallments();
+    const { installments, refetchInstallments } = useInstallmentsQuery();
     const { selectTransaction } = useTransaction();
     const [expandedInstallmentId, setExpandedInstallmentId] = useState<number | null>(null);
 

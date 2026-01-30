@@ -4,7 +4,7 @@ import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { getInstallment } from '@/api/installment.api';
 import { completeTransaction } from '@/api/transaction.api';
-import { useCalendar } from '../../contexts/CalendarContext';
+import { useCalendarQuery } from '../../hooks/useCalendarQuery';
 import { useToast } from '@/contexts/ToastContext';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { TransactionRecord } from '@/types/transactions.type';
@@ -24,7 +24,7 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
     const [changeDate, setChangeDate] = useState(false);
     const [newDate, setNewDate] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { refetchTransactions } = useCalendar();
+    const { refetchTransactions } = useCalendarQuery();
     const { showToast } = useToast();
 
     useEffect(() => {

@@ -1,18 +1,11 @@
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import { useToast } from '@/contexts/ToastContext';
-import { createExpense } from '@/api/expenses.api';
-import { createFixed } from '@/api/fixed.api';
-import { createInstallment } from '@/api/installment.api';
+import { useCreateExpense, useCreateFixed, useCreateInstallment } from '../../hooks/useMutations';
 import type { CreateExpenseData, ExpenseFormData } from '@/types/expenses.type';
 import type { CreateFixedData } from '@/types/fixeds.type';
 import type { CreateInstallmentData } from '@/types/installments.type';
 
-interface ExpenseFormProps {
-    onSubmitSuccess?: () => void;
-}
-
-export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
+export default function ExpenseForm() {
     const { register, handleSubmit, reset, watch } = useForm<ExpenseFormData>({
         defaultValues: {
             amount: undefined,
@@ -25,8 +18,10 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
         },
     });
 
-    const [isLoading, setIsLoading] = useState(false);
     const { showToast } = useToast();
+    const createExpenseMutation = useCreateExpense();
+    const createFixedMutation = useCreateFixed();
+    const createInstallmentMutation = useCreateInstallment();
 
     const expenseCategories = [
         { value: 'comida', label: 'Comida', color: '#F59E0B' },
@@ -40,20 +35,17 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
 
     const onSubmit = async (data: ExpenseFormData) => {
         try {
-            setIsLoading(true);
             if (data.expenseType === 'fixed') {
-                // Crear gasto fijo
                 const fixedData: CreateFixedData = {
                     amount: parseFloat(data.amount as string),
                     category: data.category,
                     description: data.description,
                     due_date: data.payment_day?.toString() || '1',
                 };
-                await createFixed(fixedData);
+                await createFixedMutation.mutateAsync(fixedData);
             }
 
             if (data.expenseType === 'installment') {
-                // Crear gasto a plazos
                 const installmentData: CreateInstallmentData = {
                     amount: parseFloat(data.amount as string),
                     description: data.description,
@@ -61,18 +53,17 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
                     number_of_installments: data.number_of_installments || 3,
                     due_date: data.transaction_date,
                 };
-                await createInstallment(installmentData);
+                await createInstallmentMutation.mutateAsync(installmentData);
             }
 
             if (data.expenseType === 'expense') {
-                // Crear gasto normal
                 const expenseData: CreateExpenseData = {
                     amount: parseFloat(data.amount as string),
                     description: data.description,
                     transaction_date: data.transaction_date,
                     category: data.category,
                 };
-                await createExpense(expenseData);
+                await createExpenseMutation.mutateAsync(expenseData);
             }
 
             reset({
@@ -86,12 +77,9 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             });
             
             showToast('Gasto registrado exitosamente', 'success');
-            onSubmitSuccess?.();
         } catch (error) {
             console.error('Error submitting expense:', error);
             showToast('Error al registrar el gasto', 'error');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -256,14 +244,14 @@ export default function ExpenseForm({ onSubmitSuccess }: ExpenseFormProps) {
             {/* Submit button */}
             <button
                 type="submit"
-                disabled={isLoading}
+                disabled={createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending}
                 className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${
-                    isLoading 
+                    (createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending)
                         ? 'bg-red-400 cursor-not-allowed opacity-70' 
                         : 'bg-red-500 hover:bg-red-600'
                 }`}
             >
-                {isLoading ? 'Guardando...' : '- Agregar Gasto'}
+                {(createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending) ? 'Guardando...' : '- Agregar Gasto'}
             </button>
         </form>
     );

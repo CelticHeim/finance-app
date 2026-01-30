@@ -6,6 +6,7 @@ import { getInstallment } from '@/api/installment.api';
 import { completeTransaction } from '@/api/transaction.api';
 import { useCalendarQuery } from '../../hooks/useCalendarQuery';
 import { useToast } from '@/contexts/ToastContext';
+import { formatDate as formatDateHelper } from '@/helpers/date-format';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { TransactionRecord } from '@/types/transactions.type';
 
@@ -69,17 +70,11 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
     };
 
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
+        return formatDateHelper(dateString);
     };
 
     const formatDateLong = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
+        return formatDateHelper(dateString, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

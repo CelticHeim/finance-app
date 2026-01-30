@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useFixedsQuery } from '../../hooks/useFixedsQuery';
+import { formatDate } from '@/helpers/date-format';
 
 export default function FixedTable() {
     const { fixeds, refetchFixeds } = useFixedsQuery();
@@ -18,15 +19,6 @@ export default function FixedTable() {
             otros: '#6B7280',
         };
         return colors[category.toLowerCase()] || '#6B7280';
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
     };
 
     return (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTransactions } from '@/api/finances.api';
 import { useTransaction } from '../../contexts/TransactionContext';
+import { formatDate } from '@/helpers/date-format';
 
 import MultiSelect from '@/components/ui/MultiSelect';
 import Pagination from '@/components/ui/Pagination';
@@ -52,15 +53,6 @@ export default function MovementsTable() {
     });
 
     const categories = Array.from(new Set((data?.data || []).map((m) => m.category)));
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">

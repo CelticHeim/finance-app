@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useInstallmentsQuery } from '../../hooks/useInstallmentsQuery';
 import { useTransaction } from '../../contexts/TransactionContext';
+import { formatDate } from '@/helpers/date-format';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { InstallmentItem } from '@/types/installment-items.types';
 
@@ -56,15 +57,6 @@ export default function InstallmentTable() {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
@@ -76,7 +68,7 @@ export default function InstallmentTable() {
                     <thead>
                         <tr className="border-b-2 border-gray-300 dark:border-gray-700">
                             <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 w-12">
-                                
+
                             </th>
                             <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
                                 Descripción
@@ -95,17 +87,15 @@ export default function InstallmentTable() {
                     <tbody>
                         {installments.length > 0 ? (
                             installments.map((installment) => (
-                                <>
+                                <Fragment key={installment.id}>
                                     <tr
-                                        key={installment.id}
                                         onClick={() => toggleExpand(installment.id)}
                                         className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                                     >
                                         <td className="py-4 px-4">
                                             <svg
-                                                className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${
-                                                    expandedInstallmentId === installment.id ? 'rotate-90' : ''
-                                                }`}
+                                                className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${expandedInstallmentId === installment.id ? 'rotate-90' : ''
+                                                    }`}
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -183,7 +173,7 @@ export default function InstallmentTable() {
                                             </td>
                                         </tr>
                                     )}
-                                </>
+                                </Fragment>
                             ))
                         ) : (
                             <tr>

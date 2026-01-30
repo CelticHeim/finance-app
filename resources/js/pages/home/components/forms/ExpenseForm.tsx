@@ -75,7 +75,7 @@ export default function ExpenseForm() {
                 number_of_installments: 3,
                 payment_day: 1,
             });
-            
+
             showToast('Gasto registrado exitosamente', 'success');
         } catch (error) {
             console.error('Error submitting expense:', error);
@@ -105,20 +105,6 @@ export default function ExpenseForm() {
                     </label>
                 </div>
 
-                {/* Fixed expense */}
-                <div className="flex items-center gap-3">
-                    <input
-                        type="radio"
-                        id="typeFixed"
-                        value="fixed"
-                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
-                        {...register('expenseType')}
-                    />
-                    <label htmlFor="typeFixed" className="text-sm text-gray-700 dark:text-gray-300">
-                        Gasto fijo (se repite cada mes)
-                    </label>
-                </div>
-
                 {/* Installment expense */}
                 <div className="flex items-center gap-3">
                     <input
@@ -130,6 +116,20 @@ export default function ExpenseForm() {
                     />
                     <label htmlFor="typeInstallment" className="text-sm text-gray-700 dark:text-gray-300">
                         Pago a cuotas (MSI)
+                    </label>
+                </div>
+
+                {/* Fixed expense */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="radio"
+                        id="typeFixed"
+                        value="fixed"
+                        className="w-4 h-4 border-gray-300 dark:border-gray-600"
+                        {...register('expenseType')}
+                    />
+                    <label htmlFor="typeFixed" className="text-sm text-gray-700 dark:text-gray-300">
+                        Gasto fijo (se repite cada mes)
                     </label>
                 </div>
             </div>
@@ -245,11 +245,10 @@ export default function ExpenseForm() {
             <button
                 type="submit"
                 disabled={createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending}
-                className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${
-                    (createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending)
-                        ? 'bg-red-400 cursor-not-allowed opacity-70' 
+                className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${(createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending)
+                        ? 'bg-red-400 cursor-not-allowed opacity-70'
                         : 'bg-red-500 hover:bg-red-600'
-                }`}
+                    }`}
             >
                 {(createExpenseMutation.isPending || createFixedMutation.isPending || createInstallmentMutation.isPending) ? 'Guardando...' : '- Agregar Gasto'}
             </button>

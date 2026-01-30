@@ -7,6 +7,7 @@ import { useCalendarQuery } from '../../hooks/useCalendarQuery';
 import { useInstallmentsQuery } from '../../hooks/useInstallmentsQuery';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransaction } from '@/hooks/useTransaction';
+import { formatDate as formatDateHelper } from '@/helpers/date-format';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionContext();
@@ -43,8 +44,7 @@ export default function TransactionDetails() {
     const colors = typeColors[transaction.type] || typeColors['expense'];
 
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
+        return formatDateHelper(dateString, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -104,13 +104,13 @@ export default function TransactionDetails() {
 
             resetDialog();
             showToast('Marcada como pagada', 'success', 3000, transaction.type as 'income' | 'expense' | 'installment' | 'fixed');
-            
+
             await refetchTransactions();
-            
+
             if (transaction.type === 'installment') {
                 await refetchInstallments();
             }
-            
+
             setTimeout(() => {
                 selectTransaction(null);
             }, 300);

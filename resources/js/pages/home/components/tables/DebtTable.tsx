@@ -1,3 +1,5 @@
+import { formatDate, isPast } from '@/helpers/date-format';
+
 interface Debt {
     id: string;
     description: string;
@@ -45,20 +47,8 @@ export default function DebtTable({ debts }: DebtTableProps) {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString + 'T00:00:00');
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     const isOverdue = (dateString: string) => {
-        const dueDate = new Date(dateString + 'T00:00:00');
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return dueDate < today;
+        return isPast(dateString);
     };
 
     return (

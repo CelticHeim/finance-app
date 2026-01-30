@@ -48,17 +48,15 @@ class FinanceService {
     }
 
     public function getCalendarTransactions($month, $year) {
-        $transactions = Transaction::with('transactionable')
+        $transactions = Transaction::with('installmentItem')
             ->byMonthAndYear($month, $year)
             ->get();
 
-        // Obtener que fixeds no existen en la colección de transacciones
         $fixeds = Fixed::all();
 
-        $paidFixedIds = $transactions->where('type', 'fixed')->pluck('transactionable_id')->toArray();
+        $paidFixedIds = $transactions->where('type', 'fixed')->pluck('id')->toArray();
         $unpaidFixedIds = array_diff($fixeds->pluck('id')->toArray(), $paidFixedIds);
 
-        // Generar objetos de transacciones temporales
         $transactionTemp = [];
         foreach ($unpaidFixedIds as $fixedId) {
             $fixed = $fixeds->firstWhere('id', $fixedId);
@@ -73,8 +71,6 @@ class FinanceService {
                 'discount' => '0',
                 'transaction_date' => $transactionDate,
                 'status' => 'pending',
-                'transactionable_id' => $fixedId,
-                'transactionable_type' => 'App\Models\Fixed',
                 'created_at' => null,
                 'updated_at' => null,
                 'deleted_at' => null,
@@ -95,10 +91,11 @@ class FinanceService {
                 'category' => $item->installment->category,
                 'amount' => (string) $item->amount,
                 'discount' => '0',
-                'transaction_date' => $item->payment_date,
+                'transaction_date' => $item->payment_date instanceof \Carbon\Carbon 
+                    ? $item->payment_date->toDateString() 
+                    : $item->payment_date,
                 'status' => 'pending',
-                'transactionable_id' => $item->installment->id,
-                'transactionable_type' => 'App\Models\Installment',
+                'installment_item_id' => $item->id,
                 'created_at' => null,
                 'updated_at' => null,
                 'deleted_at' => null,

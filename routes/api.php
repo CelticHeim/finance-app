@@ -36,7 +36,6 @@ Route::controller(FixedController::class)->group(function () {
 Route::controller(InstallmentController::class)->group(function () {
     Route::post('installments', 'store');
     Route::get('installments/{installment}', 'show');
-    Route::post('installments/{transaction}/complete', 'complete');
 });
 
 Route::controller(InstallmentItemController::class)->group(function () {

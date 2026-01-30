@@ -34,8 +34,7 @@ class FixedController extends Controller {
         $month = $paymentDate->month;
         $year = $paymentDate->year;
 
-        $transactionExists = Transaction::where('transactionable_id', $fixed->id)
-            ->where('transactionable_type', Fixed::class)
+        $transactionExists = Transaction::where('type', 'fixed')
             ->whereYear('transaction_date', $year)
             ->whereMonth('transaction_date', $month)
             ->first();
@@ -47,10 +46,9 @@ class FixedController extends Controller {
             ], 409);
         }
 
-        // Calcular fecha usando el día del fixed (due_date) y el mes/año enviado
-        $transactionDate = Carbon::createFromDate($year, $month, $fixed->due_date->day)->toDateString();
+        $transactionDate = Carbon::createFromDate($year, $month, $fixed->due_date)->toDateString();
 
-        $transaction = $fixed->transactions()->create([
+        $transaction = Transaction::create([
             'amount' => $fixed->amount,
             'type' => 'fixed',
             'category' => $fixed->category,

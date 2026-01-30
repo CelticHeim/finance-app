@@ -10,10 +10,8 @@ export type TransactionRecord = {
     category: string;
     type: 'income' | 'expense' | 'fixed' | 'installment';
     status: string;
-    transactionable_type: string;
-    transactionable_id: number;
+    installment_item_id?: number | null;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
-    transactionable: FixedRecord | InstallmentRecord | null;
 };

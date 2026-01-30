@@ -40,7 +40,7 @@ class FinanceController extends Controller {
         $limit = $request->query('limit', 10);
         $types = $request->query('types', ''); // 'income,expense' format
 
-        $transactions = Transaction::with('transactionable')
+        $transactions = Transaction::with('installmentItem.installment')
             ->byMonthAndYear($month, $year)
             ->byType($types)
             ->orderByDesc('transaction_date')

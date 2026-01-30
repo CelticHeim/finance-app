@@ -32,10 +32,6 @@ class Installment extends Model {
     ];
 
     // Relations
-    public function transactions() {
-        return $this->morphMany(Transaction::class, 'transactionable');
-    }
-
     public function items(): HasMany {
         return $this->hasMany(InstallmentItem::class);
     }

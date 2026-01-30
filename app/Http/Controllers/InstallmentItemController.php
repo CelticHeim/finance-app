@@ -24,12 +24,19 @@ class InstallmentItemController extends Controller {
             ], 409);
         }
 
+        if ($installmentItem->transaction) {
+            return response()->json([
+                'message' => 'La cuota ya tiene una transacción registrada',
+                'data' => $installmentItem,
+            ], 409);
+        }
+
         $installmentItem->status = 'completed';
         $installmentItem->save();
 
         $installment = $installmentItem->installment;
 
-        Transaction::create([
+        $transaction = Transaction::create([
             'amount' => $installment->amount / $installment->number_of_installments,
             'description' => $installment->description,
             'discount' => 0,
@@ -37,13 +44,12 @@ class InstallmentItemController extends Controller {
             'category' => $installment->category,
             'type' => 'installment',
             'status' => 'completed',
-            'transactionable_id' => $installment->id,
-            'transactionable_type' => get_class($installment),
+            'installment_item_id' => $installmentItem->id,
         ]);
 
         return response()->json([
             'message' => 'Cuota marcada como completada exitosamente',
-            'data' => $installmentItem->refresh(),
+            'data' => $installmentItem->load('transaction'),
         ], 200);
     }
 }

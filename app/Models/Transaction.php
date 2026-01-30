@@ -13,8 +13,7 @@ class Transaction extends Model {
         'category',
         'type',
         'status',
-        'transactionable_id',
-        'transactionable_type',
+        'installment_item_id',
     ];
 
     protected $casts = [
@@ -32,8 +31,8 @@ class Transaction extends Model {
     }
 
     // Relations
-    public function transactionable() {
-        return $this->morphTo();
+    public function installmentItem() {
+        return $this->belongsTo(InstallmentItem::class);
     }
 
     // Scopes

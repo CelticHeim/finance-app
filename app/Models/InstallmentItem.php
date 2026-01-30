@@ -24,6 +24,10 @@ class InstallmentItem extends Model {
         return $this->belongsTo(Installment::class);
     }
 
+    public function transaction() {
+        return $this->hasOne(Transaction::class);
+    }
+
     // Scopes
     public function scopeByMonthAndYear($query, $month = null, $year = null) {
         if ($month) {

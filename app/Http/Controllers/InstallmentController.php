@@ -49,31 +49,7 @@ class InstallmentController extends Controller {
     public function show(Installment $installment) {
         return response()->json([
             'message' => 'Detalle del gasto a cuotas',
-            'data' => $installment->load('items'),
+            'data' => $installment->load('items.transaction'),
         ]);
-    }
-
-    public function complete(Request $request, Transaction $transaction) {
-        $validated = $request->validate([
-            'discount' => 'nullable|numeric',
-            // 'payment_date' => 'required|date'
-        ]);
-
-        if ($transaction->status === 'completed') {
-            return response()->json([
-                'message' => 'La transacción ya ha sido completada',
-                'data' => $transaction,
-            ], 409);
-        }
-
-        $transaction->discount = $validated['discount'] ?? 0;
-        // $transaction->transaction_date = $validated['payment_date'];
-        $transaction->status = 'completed';
-        $transaction->save();
-
-        return response()->json([
-            'message' => "Transacción de cuota completada exitosamente",
-            'data' => $transaction->refresh(),
-        ], 200);
     }
 }

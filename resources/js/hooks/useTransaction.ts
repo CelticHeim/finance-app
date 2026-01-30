@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { completeTransaction } from '@/api/transaction.api';
-import { completeInstallment } from '@/api/installment.api';
+import { completeInstallmentItem } from '@/api/installment-items.api';
 import { completeFixed } from '@/api/fixed.api';
 import type { TransactionRecord } from '@/types/transactions.type';
 
@@ -19,17 +19,15 @@ export const useTransaction = () => {
 
                 switch (transaction.type) {
                     case 'installment': {
-                        // Installments expect: discount (optional) and payment_date
-                        response = await completeInstallment(transaction.id, {
-                            discount: discount ?? null,
-                            payment_date: payment_date,
-                        });
+                        if (!transaction.installment_item_id) {
+                            throw new Error('installment_item_id is required for installment transactions');
+                        }
+                        response = await completeInstallmentItem(transaction.installment_item_id);
                         break;
                     }
 
                     case 'fixed': {
-                        // Fixed expenses expect: discount (optional) and payment_date
-                        const fixedId = transaction.transactionable_id;
+                        const fixedId = transaction.id;
                         response = await completeFixed(fixedId, {
                             discount: discount ?? null,
                             payment_date: payment_date,
@@ -40,7 +38,6 @@ export const useTransaction = () => {
                     case 'expense':
                     case 'income':
                     default: {
-                        // Regular transactions (expense/income) expect: discount (optional)
                         response = await completeTransaction(transaction.id, {
                             discount: discount ?? null,
                         });

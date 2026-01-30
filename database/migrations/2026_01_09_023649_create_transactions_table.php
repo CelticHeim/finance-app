@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('category');
             $table->string('type'); // 'income', 'expense', 'fixed', 'installment'
             $table->string('status')->default('pending'); // 'pending', 'completed', 'failed'
-            $table->nullableMorphs('transactionable'); // Create nullable transactionable_id and transactionable_type columns
+            $table->foreignId('installment_item_id')->nullable()->constrained('installment_items')->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -4,12 +4,14 @@ import AlertDialog from '@/components/ui/AlertDialog';
 import Button from '@/components/ui/Button';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 import { useFinance } from '@/contexts/FinanceContext';
+import { useCalendar } from '../../contexts/CalendarContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransaction } from '@/hooks/useTransaction';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionSelection();
-    const { refetchTransactions, refetchInstallments, currentMonth, currentYear } = useFinance();
+    const { refetchInstallments } = useFinance();
+    const { refetchTransactions, currentMonth, currentYear } = useCalendar();
     const { showToast } = useToast();
     const { completeTransactionByType } = useTransaction();
 

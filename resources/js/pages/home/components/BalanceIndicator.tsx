@@ -1,7 +1,7 @@
-import { useFinance } from '@/contexts/FinanceContext';
+import { useCalendar } from '../contexts/CalendarContext';
 
 export default function BalanceIndicator() {
-    const { summary } = useFinance();
+    const { summary } = useCalendar();
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

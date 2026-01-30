@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import CalendarGrid from './CalendarGrid';
-import { useFinance } from '@/contexts/FinanceContext';
+import { useCalendar } from '../../contexts/CalendarContext';
 import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
 import type { TransactionRecord } from '@/types/transactions.type';
 
@@ -22,7 +22,7 @@ export default function Calendar() {
         currentYear,
         transactions,
         setMonth,
-    } = useFinance();
+    } = useCalendar();
 
     const { selectTransaction } = useTransactionSelection();
 

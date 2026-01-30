@@ -7,6 +7,7 @@ import InstallmentTable from './components/tables/InstallmentTable';
 import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
 import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
+import { CalendarProvider, useCalendar } from './contexts/CalendarContext';
 import { TransactionSelectionProvider } from '../../contexts/TransactionSelectionContext';
 import { CacheInvalidationProvider, useCacheInvalidation } from '../../contexts/CacheInvalidationContext';
 import ToastContainer from '@/components/ui/ToastContainer';
@@ -14,20 +15,24 @@ import ToastContainer from '@/components/ui/ToastContainer';
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
 
-    // Obtener datos y funciones del contexto
     const {
         loadInitialData,
-        refetchTransactions,
+        refetchTransactions: refetchTransactionsFinance,
     } = useFinance();
+
+    const {
+        loadCalendarData,
+        refetchTransactions: refetchTransactionsCalendar,
+    } = useCalendar();
 
     const {
         onTransactionAdded,
     } = useCacheInvalidation();
 
-    // Cargar datos al montar el componente
     useEffect(() => {
         loadInitialData();
-    }, [loadInitialData]);
+        loadCalendarData();
+    }, [loadInitialData, loadCalendarData]);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -45,10 +50,9 @@ function HomeContent() {
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
                             <RegistroForm onDataUpdated={() => {
-                                // Notificar a todos los subscribers de que hay nuevas transacciones
                                 onTransactionAdded();
-                                // También refetch el contexto de finanzas para calendar y balance
-                                refetchTransactions();
+                                refetchTransactionsFinance();
+                                refetchTransactionsCalendar();
                             }} />
                         </div>
                     </div>
@@ -115,12 +119,14 @@ function HomeContent() {
 export default function Home() {
     return (
         <FinanceProvider>
-            <TransactionSelectionProvider>
-                <CacheInvalidationProvider>
-                    <HomeContent />
-                    <ToastContainer />
-                </CacheInvalidationProvider>
-            </TransactionSelectionProvider>
+            <CalendarProvider>
+                <TransactionSelectionProvider>
+                    <CacheInvalidationProvider>
+                        <HomeContent />
+                        <ToastContainer />
+                    </CacheInvalidationProvider>
+                </TransactionSelectionProvider>
+            </CalendarProvider>
         </FinanceProvider>
     );
 }

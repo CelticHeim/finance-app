@@ -1,36 +1,36 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import type { TransactionRecord } from '@/types/transactions.type';
 
-interface TransactionSelectionContextType {
+interface TransactionContextType {
     selectedTransaction: TransactionRecord | null;
     selectTransaction: (transaction: TransactionRecord | null) => void;
 }
 
-const TransactionSelectionContext = createContext<TransactionSelectionContextType | undefined>(undefined);
+const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
-export function TransactionSelectionProvider({ children }: { children: ReactNode }) {
+export function TransactionProvider({ children }: { children: ReactNode }) {
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null);
 
     const selectTransaction = useCallback((transaction: TransactionRecord | null) => {
         setSelectedTransaction(transaction);
     }, []);
 
-    const value: TransactionSelectionContextType = {
+    const value: TransactionContextType = {
         selectedTransaction,
         selectTransaction,
     };
 
     return (
-        <TransactionSelectionContext.Provider value={value}>
+        <TransactionContext.Provider value={value}>
             {children}
-        </TransactionSelectionContext.Provider>
+        </TransactionContext.Provider>
     );
 }
 
-export function useTransactionSelection() {
-    const context = useContext(TransactionSelectionContext);
+export function useTransaction() {
+    const context = useContext(TransactionContext);
     if (context === undefined) {
-        throw new Error('useTransactionSelection must be used within a TransactionSelectionProvider');
+        throw new Error('useTransaction must be used within a TransactionProvider');
     }
     return context;
 }

@@ -6,21 +6,14 @@ import MovementsTable from './components/tables/MovementsTable';
 import InstallmentTable from './components/tables/InstallmentTable';
 import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
-import { FinanceProvider, useFinance } from '../../contexts/FinanceContext';
 import { CalendarProvider, useCalendar } from './contexts/CalendarContext';
 import { FixedsProvider, useFixeds } from './contexts/FixedsContext';
 import { InstallmentsProvider, useInstallments } from './contexts/InstallmentsContext';
-import { TransactionSelectionProvider } from '../../contexts/TransactionSelectionContext';
-import { CacheInvalidationProvider, useCacheInvalidation } from '../../contexts/CacheInvalidationContext';
+import { TransactionProvider } from './contexts/TransactionContext';
 import ToastContainer from '@/components/ui/ToastContainer';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');
-
-    const {
-        loadInitialData,
-        refetchTransactions: refetchTransactionsFinance,
-    } = useFinance();
 
     const {
         loadCalendarData,
@@ -29,24 +22,17 @@ function HomeContent() {
 
     const {
         loadFixeds,
-        refetchFixeds,
     } = useFixeds();
 
     const {
         loadInstallments,
-        refetchInstallments,
     } = useInstallments();
 
-    const {
-        onTransactionAdded,
-    } = useCacheInvalidation();
-
     useEffect(() => {
-        loadInitialData();
         loadCalendarData();
         loadFixeds();
         loadInstallments();
-    }, [loadInitialData, loadCalendarData, loadFixeds, loadInstallments]);
+    }, [loadCalendarData, loadFixeds, loadInstallments]);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -64,11 +50,7 @@ function HomeContent() {
                     <div className="lg:col-span-1">
                         <div className="sticky top-6">
                             <RegistroForm onDataUpdated={() => {
-                                onTransactionAdded();
-                                refetchTransactionsFinance();
                                 refetchTransactionsCalendar();
-                                refetchFixeds();
-                                refetchInstallments();
                             }} />
                         </div>
                     </div>
@@ -134,20 +116,16 @@ function HomeContent() {
 // Componente principal que provee los contextos
 export default function Home() {
     return (
-        <FinanceProvider>
-            <CalendarProvider>
-                <FixedsProvider>
-                    <InstallmentsProvider>
-                        <TransactionSelectionProvider>
-                            <CacheInvalidationProvider>
-                                <HomeContent />
-                                <ToastContainer />
-                            </CacheInvalidationProvider>
-                        </TransactionSelectionProvider>
-                    </InstallmentsProvider>
-                </FixedsProvider>
-            </CalendarProvider>
-        </FinanceProvider>
+        <CalendarProvider>
+            <FixedsProvider>
+                <InstallmentsProvider>
+                    <TransactionProvider>
+                        <HomeContent />
+                        <ToastContainer />
+                    </TransactionProvider>
+                </InstallmentsProvider>
+            </FixedsProvider>
+        </CalendarProvider>
     );
 }
 

@@ -1,27 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useInstallments } from '../../contexts/InstallmentsContext';
-import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
-import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
+import { useTransaction } from '../../contexts/TransactionContext';
 import type { InstallmentRecord } from '@/types/installments.type';
 import type { InstallmentItem } from '@/types/installment-items.types';
 
 export default function InstallmentTable() {
     const { installments, refetchInstallments } = useInstallments();
-    const { subscribeToInstallments } = useCacheInvalidation();
-    const { selectTransaction } = useTransactionSelection();
+    const { selectTransaction } = useTransaction();
     const [expandedInstallmentId, setExpandedInstallmentId] = useState<number | null>(null);
 
     useEffect(() => {
         refetchInstallments();
     }, [refetchInstallments]);
-
-    useEffect(() => {
-        const unsubscribe = subscribeToInstallments(() => {
-            refetchInstallments();
-        });
-
-        return unsubscribe;
-    }, [subscribeToInstallments, refetchInstallments]);
 
     const toggleExpand = (installmentId: number) => {
         setExpandedInstallmentId(expandedInstallmentId === installmentId ? null : installmentId);

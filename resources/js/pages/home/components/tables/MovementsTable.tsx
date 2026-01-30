@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTransactions } from '@/api/finances.api';
-import { useTransactionSelection } from '@/contexts/TransactionSelectionContext';
+import { useTransaction } from '../../contexts/TransactionContext';
 
 import MultiSelect from '@/components/ui/MultiSelect';
 import Pagination from '@/components/ui/Pagination';
 import Badge from '../Badge';
 
 export default function MovementsTable() {
-    const { selectTransaction, selectedTransaction } = useTransactionSelection();
+    const { selectTransaction, selectedTransaction } = useTransaction();
 
     const [currentPage, setCurrentPage] = useState(1);
     const perPage = 10;

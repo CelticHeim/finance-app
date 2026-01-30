@@ -1,24 +1,12 @@
 import { useEffect } from 'react';
 import { useFixeds } from '../../contexts/FixedsContext';
-import { useCacheInvalidation } from '@/contexts/CacheInvalidationContext';
 
 export default function FixedTable() {
     const { fixeds, refetchFixeds } = useFixeds();
-    const { subscribeToFixeds } = useCacheInvalidation();
 
-    // Cargar datos cuando el componente se monta
     useEffect(() => {
         refetchFixeds();
     }, [refetchFixeds]);
-
-    // Recargar cuando se recibe notificación de 'fixed-added'
-    useEffect(() => {
-        const unsubscribe = subscribeToFixeds(() => {
-            refetchFixeds();
-        });
-
-        return unsubscribe;
-    }, [subscribeToFixeds, refetchFixeds]);
 
     const getCategoryColor = (category: string): string => {
         const colors: { [key: string]: string } = {

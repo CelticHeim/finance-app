@@ -227,7 +227,7 @@ export default function InstallmentDetails({ isOpen, installment, onClose }: Ins
                     onConfirm={async () => {
                         try {
                             setIsSubmitting(true);
-                            const payload = applyDiscount && discountValue !== null && discountValue !== '' 
+                            const payload: any = applyDiscount && discountValue !== null
                                 ? { discount: parseFloat(discountValue.toString()) }
                                 : { discount: null };
                             

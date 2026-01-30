@@ -23,14 +23,18 @@ export function useCompleteTransaction() {
 
             switch (transaction.type) {
                 case 'installment': {
-                    if (!transaction.installment_item_id) {
-                        throw new Error('installment_item_id is required for installment transactions');
+                    const itemId = transaction.transactionable_id || transaction.installment_item_id;
+                    if (!itemId) {
+                        throw new Error('transactionable_id or installment_item_id is required for installment transactions');
                     }
-                    return await completeInstallmentItem(transaction.installment_item_id);
+                    return await completeInstallmentItem(itemId);
                 }
 
                 case 'fixed': {
-                    const fixedId = transaction.id;
+                    const fixedId = transaction.transactionable_id || transaction.id;
+                    if (!fixedId) {
+                        throw new Error('transactionable_id or id is required for fixed transactions');
+                    }
                     return await completeFixed(fixedId, {
                         discount: discount ?? null,
                         payment_date: payment_date,
@@ -40,6 +44,9 @@ export function useCompleteTransaction() {
                 case 'expense':
                 case 'income':
                 default: {
+                    if (!transaction.id) {
+                        throw new Error('id is required for expense/income transactions');
+                    }
                     return await completeTransaction(transaction.id, {
                         discount: discount ?? null,
                     });

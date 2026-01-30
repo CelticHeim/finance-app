@@ -3,7 +3,7 @@ import type { InstallmentRecord } from "./installments.type";
 import type { InstallmentItem } from "./installment-items.types";
 
 export type TransactionRecord = {
-    id: number;
+    id: number | null;
     amount: string;
     description: string | null;
     discount: string;
@@ -11,6 +11,9 @@ export type TransactionRecord = {
     category: string;
     type: 'income' | 'expense' | 'fixed' | 'installment';
     status: string;
+    final_amount?: string;
+    transactionable_id?: number;
+    transactionable_type?: string;
     installment_item_id?: number | null;
     installment_item?: InstallmentItem;
     created_at: string;

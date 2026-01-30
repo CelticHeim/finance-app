@@ -85,7 +85,7 @@ export default function TransactionDetails() {
                 paymentDate = baseDate.toISOString().split('T')[0];
             }
 
-            const discount = applyDiscount && discountValue !== null && discountValue !== ''
+            const discount = applyDiscount && discountValue !== null
                 ? parseFloat(discountValue.toString())
                 : null;
 

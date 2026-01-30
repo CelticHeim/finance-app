@@ -117,14 +117,14 @@ export default function IncomeForm() {
             {/* Submit button */}
             <button
                 type="submit"
-                disabled={isLoading}
+                disabled={createIncomeMutation.isPending}
                 className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all ${
-                    isLoading 
+                    createIncomeMutation.isPending 
                         ? 'bg-green-400 cursor-not-allowed opacity-70' 
                         : 'bg-green-500 hover:bg-green-600'
                 }`}
             >
-                {isLoading ? 'Guardando...' : '+ Agregar Ingreso'}
+                {createIncomeMutation.isPending ? 'Guardando...' : '+ Agregar Ingreso'}
             </button>
         </form>
     );

@@ -46,7 +46,7 @@ class FixedController extends Controller {
             ], 409);
         }
 
-        $transactionDate = Carbon::createFromDate($year, $month, $fixed->due_date)->toDateString();
+        $transactionDate = Carbon::createFromDate($year, $month, $fixed->due_date->day)->toDateString();
 
         $transaction = Transaction::create([
             'amount' => $fixed->amount,
@@ -56,6 +56,8 @@ class FixedController extends Controller {
             'transaction_date' => $transactionDate,
             'discount' => $validated['discount'] ?? 0,
             'status' => 'completed',
+            'transactionable_id' => $fixed->id,
+            'transactionable_type' => 'App\\Models\\Fixed',
         ]);
 
         return response()->json([

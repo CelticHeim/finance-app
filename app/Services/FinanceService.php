@@ -10,31 +10,29 @@ use Carbon\Carbon;
 
 class FinanceService {
     public function getSummary($month, $year) {
-        // Calcular totales globales
-        $summary = Transaction::selectRaw(
-            'SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) as totalIncome,
-             SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) as totalExpenses'
-        )->first();
+        // Obtener el balance disponible sumando todos los ingresos y restando todos los gastos
+        $totalIncome = Transaction::where('type', 'income')->sum('amount');
+        $totalExpenses = Transaction::whereIn('type', ['expense', 'installment', 'fixed'])->sum('amount');
 
-        // Calcular ingresos y deudas del mes actual
-        $monthSummary = Transaction::selectRaw(
-            'SUM(CASE WHEN type = "income" AND YEAR(transaction_date) = ? AND MONTH(transaction_date) = ? THEN amount ELSE 0 END) as currentMonthIncome,
-             SUM(CASE WHEN (type = "installment") AND YEAR(transaction_date) = ? AND MONTH(transaction_date) = ? THEN amount ELSE 0 END) as transactionDebt',
-            [$year, $month, $year, $month]
-        )->first();
+        $availableBalance = $totalIncome - $totalExpenses;
 
-        // Sumar montos de gastos fijos (se repiten cada mes)
+        // Obtener la deuda total solo de los InstallmentItem pendientes
+        $installmentDebt = InstallmentItem::where('status', 'pending')->sum('amount');
+
+        // Obtener los ingresos solo del mes actual
+        $currentMonthIncome = Transaction::where('type', 'income')
+            ->whereYear('transaction_date', $year)
+            ->whereMonth('transaction_date', $month)
+            ->sum('amount');
+
+        // Obtener la deuda del mes actual sumando los gastos fijos y los InstallmentItem pendientes
         $fixedDebt = Fixed::sum('amount') ?? 0;
-
-        // Calcular deuda total del mes (expenses + installments + fixed)
-        $currentMonthDebt = ($monthSummary->transactionDebt ?? 0) + $fixedDebt;
-
-        $availableBalance = $summary->totalIncome - $summary->totalExpenses;
+        $currentMonthDebt = $installmentDebt + $fixedDebt;
 
         return [
             'available_balance' => $availableBalance,
-            'total_debt' => $summary->totalExpenses,
-            'current_month_income' => $monthSummary->currentMonthIncome,
+            'total_debt' => $totalExpenses,
+            'current_month_income' => $currentMonthIncome,
             'current_month_debt' => $currentMonthDebt,
         ];
     }
@@ -68,10 +66,10 @@ class FinanceService {
         foreach ($unpaidFixedIds as $fixedId) {
             $fixed = $fixeds->firstWhere('id', $fixedId);
             $dueDay = $fixed->due_date->day;
-            
+
             $lastDayOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth()->day;
             $adjustedDay = min($dueDay, $lastDayOfMonth);
-            
+
             $transactionDate = Carbon::createFromDate($year, $month, $adjustedDay)->toDateString();
 
             $transactionTemp[] = (object) [

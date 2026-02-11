@@ -38,15 +38,17 @@ export default function Calendar() {
                 'expense': '#EF4444',
             };
 
+            const transactionDate = record.transaction_date?.split('T')[0] || record.transaction_date;
+
             return {
-                id: `${record.type}-${record.id}`,
+                id: `${record.type}-${record.id || record.transactionable_id}-${transactionDate}`,
                 title: record.description || record.category,
                 amount: parseFloat(record.amount),
                 color: colorMap[record.type as keyof typeof colorMap] || '#EF4444',
                 type: record.type,
-                date: record.transaction_date?.split('T')[0] || record.transaction_date,
+                date: transactionDate,
                 isPaid: record.status === 'completed',
-                fixedId: record.type === 'fixed' ? record.id : undefined,
+                fixedId: record.type === 'fixed' ? record.transactionable_id : undefined,
                 transactionData: record,
             };
         });

@@ -81,8 +81,12 @@ export default function TransactionDetails() {
             if (changeDate && newDate) {
                 paymentDate = newDate;
             } else {
-                const baseDate = new Date(currentYear, currentMonth, 1);
-                paymentDate = baseDate.toISOString().split('T')[0];
+                if (transaction.transaction_date) {
+                    paymentDate = transaction.transaction_date.split('T')[0];
+                } else {
+                    const baseDate = new Date(currentYear, currentMonth, 1);
+                    paymentDate = baseDate.toISOString().split('T')[0];
+                }
             }
 
             const discount = applyDiscount && discountValue !== null

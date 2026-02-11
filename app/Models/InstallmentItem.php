@@ -27,7 +27,7 @@ class InstallmentItem extends Model {
     }
 
     public function transaction() {
-        return $this->hasOne(Transaction::class);
+        return $this->hasOne(Transaction::class, 'transactionable_id')->where('transactionable_type', 'App\\Models\\InstallmentItem');
     }
 
     // Scopes

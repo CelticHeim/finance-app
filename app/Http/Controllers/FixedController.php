@@ -35,6 +35,8 @@ class FixedController extends Controller {
         $year = $paymentDate->year;
 
         $transactionExists = Transaction::where('type', 'fixed')
+            ->where('transactionable_id', $fixed->id)
+            ->where('transactionable_type', 'App\\Models\\Fixed')
             ->whereYear('transaction_date', $year)
             ->whereMonth('transaction_date', $month)
             ->first();

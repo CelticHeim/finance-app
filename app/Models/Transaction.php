@@ -13,7 +13,8 @@ class Transaction extends Model {
         'category',
         'type',
         'status',
-        'installment_item_id',
+        'transactionable_id',
+        'transactionable_type',
     ];
 
     protected $casts = [
@@ -31,18 +32,27 @@ class Transaction extends Model {
     }
 
     // Relations
+    public function transactionable() {
+        return $this->morphTo();
+    }
+
     public function installmentItem() {
-        return $this->belongsTo(InstallmentItem::class);
+        return $this->belongsTo(InstallmentItem::class, 'transactionable_id');
     }
 
     // Scopes
     public function scopeByMonthAndYear($query, $month = null, $year = null) {
-        if ($month) {
-            $query->whereMonth('transaction_date', $month);
-        }
+        // if ($month) {
+        //     $query->whereMonth('transaction_date', $month);
+        // }
 
-        if ($year) {
-            $query->whereYear('transaction_date', $year);
+        // if ($year) {
+        //     $query->whereYear('transaction_date', $year);
+        // }
+
+        if ($month && $year) {
+            $query->whereYear('transaction_date', $year)
+                ->whereMonth('transaction_date', $month);
         }
 
         return $query;

@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Installment;
-use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -65,25 +64,16 @@ class InstallmentSeeder extends Seeder
                 'status' => 'pending',
             ]);
 
-            // Create transactions for each installment dynamically
+            // Create installment items for each payment
             $amountPerInstallment = $installmentData['amount'] / $installmentData['number_of_installments'];
-            $transactions = [];
             for ($i = 1; $i <= $installmentData['number_of_installments']; $i++) {
-                $transactions[] = new Transaction([
-                    'description' => $installmentData['description'] . " - Cuota $i de " . $installmentData['number_of_installments'],
+                $installment->items()->create([
                     'amount' => $amountPerInstallment,
-                    'discount' => 0,
-                    'transaction_date' => $installmentData['due_date']->clone()
+                    'payment_date' => $installmentData['due_date']->clone()
                         ->addMonths($i - 1)->format('Y-m-d'),
-                    'category' => $installmentData['category'],
-                    'type' => 'installment',
                     'status' => 'pending',
-                    'transactionable_id' => $installment->id,
-                    'transactionable_type' => Installment::class,
                 ]);
             }
-
-            $installment->transactions()->saveMany($transactions);
         }
     }
 }

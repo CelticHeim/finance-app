@@ -53,8 +53,8 @@ class FinanceController extends Controller {
     }
 
     public function getCalendarTransactions(Request $request) {
-        $month = $request->query('month', now()->month);
-        $year = $request->query('year', now()->year);
+        $month = $request->query('month');
+        $year = $request->query('year');
 
         $transactions = $this->financeService->getCalendarTransactions($month, $year);
         $summary = $this->financeService->getSummary($month, $year);

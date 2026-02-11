@@ -52,15 +52,27 @@ class FinanceService {
             ->byMonthAndYear($month, $year)
             ->get();
 
+        // return $transactions;
+
         $fixeds = Fixed::all();
 
-        $paidFixedIds = $transactions->where('type', 'fixed')->pluck('id')->toArray();
+        $paidFixedIds = $transactions
+            ->where('type', 'fixed')
+            ->where('transactionable_type', 'App\\Models\\Fixed')
+            ->pluck('transactionable_id')
+            ->filter()
+            ->toArray();
         $unpaidFixedIds = array_diff($fixeds->pluck('id')->toArray(), $paidFixedIds);
 
         $transactionTemp = [];
         foreach ($unpaidFixedIds as $fixedId) {
             $fixed = $fixeds->firstWhere('id', $fixedId);
-            $transactionDate = Carbon::createFromDate($year, $month, $fixed->due_date->day)->toDateString();
+            $dueDay = $fixed->due_date->day;
+            
+            $lastDayOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth()->day;
+            $adjustedDay = min($dueDay, $lastDayOfMonth);
+            
+            $transactionDate = Carbon::createFromDate($year, $month, $adjustedDay)->toDateString();
 
             $transactionTemp[] = (object) [
                 'id' => null,
@@ -93,11 +105,8 @@ class FinanceService {
                 'category' => $item->installment->category,
                 'amount' => (string) $item->amount,
                 'discount' => '0',
-                'transaction_date' => $item->payment_date instanceof \Carbon\Carbon
-                    ? $item->payment_date->toDateString()
-                    : $item->payment_date,
+                'transaction_date' => $item->payment_date->toDateString(),
                 'status' => 'pending',
-                'installment_item_id' => $item->id,
                 'transactionable_id' => $item->id,
                 'transactionable_type' => 'App\\Models\\InstallmentItem',
                 'created_at' => null,

@@ -45,7 +45,8 @@ class InstallmentItemController extends Controller {
             'category' => $installment->category,
             'type' => 'installment',
             'status' => 'completed',
-            'installment_item_id' => $installmentItem->id,
+            'transactionable_id' => $installmentItem->id,
+            'transactionable_type' => 'App\\Models\\InstallmentItem',
         ]);
 
         $completedCount = $installment->items()->where('status', 'completed')->count();

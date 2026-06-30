@@ -1,6 +1,6 @@
 import { createFixed, completeFixed } from '@/shared/api/fixed.api';
 import { QueryKey } from '@/shared/constants/queryKeys';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/shared/lib/queryClient';
 import type { CreateFixedData } from '@/shared/types/dtos/fixeds.dto';
 
 export const fixedKeys = {

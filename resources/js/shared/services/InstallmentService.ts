@@ -1,6 +1,6 @@
 import { createInstallment, getInstallment, completeInstallment } from '@/shared/api/installment.api';
 import { QueryKey } from '@/shared/constants/queryKeys';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/shared/lib/queryClient';
 import type { CreateInstallmentData } from '@/shared/types/dtos/installments.dto';
 
 export const installmentKeys = {

@@ -1,6 +1,6 @@
 import { completeTransaction } from '@/shared/api/transaction.api';
 import { QueryKey } from '@/shared/constants/queryKeys';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/shared/lib/queryClient';
 
 export const transactionKeys = {
   all: [QueryKey.TRANSACTIONS] as const,

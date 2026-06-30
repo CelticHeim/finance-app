@@ -1,6 +1,6 @@
 import { getInstallmentItem, completeInstallmentItem } from '@/shared/api/installment-items.api';
 import { QueryKey } from '@/shared/constants/queryKeys';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/shared/lib/queryClient';
 
 export const installmentItemKeys = {
   all: [QueryKey.INSTALLMENT_ITEMS] as const,

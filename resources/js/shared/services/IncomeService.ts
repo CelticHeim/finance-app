@@ -1,6 +1,6 @@
 import { createIncome } from '@/shared/api/incomes.api';
 import { QueryKey } from '@/shared/constants/queryKeys';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/shared/lib/queryClient';
 import type { CreateIncomeData } from '@/shared/types/dtos/incomes.dto';
 
 export const incomeKeys = {

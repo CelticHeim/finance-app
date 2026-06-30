@@ -1,6 +1,6 @@
 import { createExpense } from '@/shared/api/expenses.api';
 import { QueryKey } from '@/shared/constants/queryKeys';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/shared/lib/queryClient';
 import type { CreateExpenseData } from '@/shared/types/dtos/expenses.dto';
 
 export const expenseKeys = {

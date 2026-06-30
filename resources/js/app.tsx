@@ -15,19 +15,19 @@ const app = document.getElementById('app');
 const queryClient = new QueryClient();
 
 if (app) {
-    const root = createRoot(app);
+  const root = createRoot(app);
 
-    root.render(
-        <StrictMode>
-            <ToastProvider>
-                <QueryClientProvider client={queryClient}>
-                    <BrowserRouter>
-                        <Routes>
-                            <Route path="/" element={<Home />} />
-                        </Routes>
-                    </BrowserRouter>
-                </QueryClientProvider>
-            </ToastProvider>
-        </StrictMode>
-    );
+  root.render(
+    <StrictMode>
+      <ToastProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ToastProvider>
+    </StrictMode>
+  );
 }

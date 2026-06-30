@@ -14,6 +14,7 @@ export interface Transaction {
     transactionable_type: string;
     created_at: string;
     updated_at: string;
+    
     transactionable?: Fixed | InstallmentItem;
     installmentItem?: InstallmentItem;
 }

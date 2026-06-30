@@ -12,5 +12,6 @@ export interface Installment {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  
   items?: InstallmentItem[];
 }

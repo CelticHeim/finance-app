@@ -1,4 +1,4 @@
-import api from "@/lib/axios";
+import api from "@/shared/lib/axios";
 import type { 
     FinanceIndexResponse, 
     TransactionsResponse, 
@@ -6,7 +6,7 @@ import type {
     FixedsResponse,
     InstallmentsResponse,
     CalendarResponse
-} from "@/types/finances.types";
+} from "@/shared/types/dtos/finances.dto";
 
 // Obtiene el resumen completo del mes actual (transacciones, resumen, fixeds, installments)
 export const getFinances = async (): Promise<FinanceIndexResponse | undefined> => {

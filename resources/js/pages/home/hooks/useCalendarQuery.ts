@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
-import { getCalendarData } from '@/api/finances.api';
-import type { SummaryData } from '@/types/finances.types';
-import type { TransactionRecord } from '@/types/transactions.type';
+import { getCalendarData } from '@/shared/api/finances.api';
+import type { SummaryData } from '@/shared/types/dtos/finances.dto';
+import type { Transaction } from '@/types/entities/Transaction';
 
 export function useCalendarQuery() {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -28,7 +28,7 @@ export function useCalendarQuery() {
     }, [queryClient, currentMonth, currentYear]);
 
     return {
-        transactions: (data?.transactions || []) as TransactionRecord[],
+        transactions: (data?.transactions || []) as Transaction[],
         summary: (data?.summary || null) as SummaryData | null,
         currentMonth,
         currentYear,

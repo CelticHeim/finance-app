@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTransactions } from '@/api/finances.api';
+import { getTransactions } from '@/shared/api/finances.api';
 import { useTransaction } from '../../contexts/TransactionContext';
-import { formatDate } from '@/helpers/date-format';
+import { formatDate } from '@/shared/helpers/date-format';
 
-import MultiSelect from '@/components/ui/MultiSelect';
-import Pagination from '@/components/ui/Pagination';
+import MultiSelect from '@/shared/components/ui/MultiSelect';
+import Pagination from '@/shared/components/ui/Pagination';
 import Badge from '../Badge';
 
 export default function MovementsTable() {

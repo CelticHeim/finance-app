@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { getFixeds } from '@/api/finances.api';
-import type { FixedRecord } from '@/types/fixeds.type';
+import { getFixeds } from '@/shared/api/finances.api';
+import type { Fixed } from '@/types/entities/Fixed';
 
 export function useFixedsQuery() {
     const queryClient = useQueryClient();
@@ -20,7 +20,7 @@ export function useFixedsQuery() {
     }, [queryClient]);
 
     return {
-        fixeds: (data || []) as FixedRecord[],
+        fixeds: (data || []) as Fixed[],
         loading: isLoading,
         refetchFixeds,
     };

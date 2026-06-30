@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
-import AlertDialog from '@/components/ui/AlertDialog';
-import Button from '@/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
+import AlertDialog from '@/shared/components/ui/AlertDialog';
+import Button from '@/shared/components/ui/Button';
 import { useTransaction as useTransactionContext } from '../../contexts/TransactionContext';
 import { useCalendarQuery } from '../../hooks/useCalendarQuery';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/shared/contexts/ToastContext';
 import { useCompleteTransaction } from '../../hooks/useCompleteTransaction';
-import { formatDate as formatDateHelper } from '@/helpers/date-format';
+import { formatDate as formatDateHelper } from '@/shared/helpers/date-format';
 
 export default function TransactionDetails() {
     const { selectedTransaction, selectTransaction } = useTransactionContext();

@@ -1,17 +1,17 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import type { TransactionRecord } from '@/types/transactions.type';
+import type { Transaction } from '@/types/entities/Transaction';
 
 interface TransactionContextType {
-    selectedTransaction: TransactionRecord | null;
-    selectTransaction: (transaction: TransactionRecord | null) => void;
+    selectedTransaction: Transaction | null;
+    selectTransaction: (transaction: Transaction | null) => void;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
 export function TransactionProvider({ children }: { children: ReactNode }) {
-    const [selectedTransaction, setSelectedTransaction] = useState<TransactionRecord | null>(null);
+    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
-    const selectTransaction = useCallback((transaction: TransactionRecord | null) => {
+    const selectTransaction = useCallback((transaction: Transaction | null) => {
         setSelectedTransaction(transaction);
     }, []);
 

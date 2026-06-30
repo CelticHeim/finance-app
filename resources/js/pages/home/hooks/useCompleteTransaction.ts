@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { completeTransaction } from '@/api/transaction.api';
-import { completeInstallmentItem } from '@/api/installment-items.api';
-import { completeFixed } from '@/api/fixed.api';
-import type { TransactionRecord } from '@/types/transactions.type';
+import { completeTransaction } from '@/shared/api/transaction.api';
+import { completeInstallmentItem } from '@/shared/api/installment-items.api';
+import { completeFixed } from '@/shared/api/fixed.api';
+import type { Transaction } from '@/types/entities/Transaction';
 
 export interface CompleteTransactionPayload {
     discount?: number | null;
@@ -10,7 +10,7 @@ export interface CompleteTransactionPayload {
 }
 
 interface CompleteTransactionParams {
-    transaction: TransactionRecord;
+    transaction: Transaction;
     payload: CompleteTransactionPayload;
 }
 
@@ -67,7 +67,7 @@ export function useCompleteTransaction() {
                     ...old,
                     data: {
                         ...old.data,
-                        transactions: old.data.transactions.map((t: TransactionRecord) => {
+                        transactions: old.data.transactions.map((t: Transaction) => {
                             const isInstallmentMatch = transaction.type === 'installment' && 
                                 t.installment_item_id === transaction.installment_item_id;
                             

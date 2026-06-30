@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { getInstallments } from '@/api/finances.api';
-import type { InstallmentRecord } from '@/types/installments.type';
+import { getInstallments } from '@/shared/api/finances.api';
+import type { Installment } from '@/types/entities/Installment';
 
 export function useInstallmentsQuery() {
     const queryClient = useQueryClient();
@@ -20,7 +20,7 @@ export function useInstallmentsQuery() {
     }, [queryClient]);
 
     return {
-        installments: (data || []) as InstallmentRecord[],
+        installments: (data || []) as Installment[],
         loading: isLoading,
         refetchInstallments,
     };

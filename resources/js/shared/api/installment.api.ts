@@ -1,5 +1,5 @@
-import api from "@/lib/axios";
-import type { CreateInstallmentData } from "@/types/installments.type";
+import api from "@/shared/lib/axios";
+import type { CreateInstallmentData } from "@/dtos/installments.dto";
 
 export const createInstallment = async (data: CreateInstallmentData) => {
     try {

@@ -1,4 +1,4 @@
-import api from "@/lib/axios";
+import api from "@/shared/lib/axios";
 
 export const completeTransaction = async (id: number, data?: { discount?: number | null }) => {
     try {

@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/shared/contexts/ToastContext';
 import { useCreateIncome } from '../../hooks/useMutations';
-import type { CreateIncomeData } from '@/types/incomes.type';
+import type { CreateIncomeData } from '@/dtos/incomes.dto';
 
 export default function IncomeForm() {
     const { register, handleSubmit, reset, watch } = useForm<CreateIncomeData>({

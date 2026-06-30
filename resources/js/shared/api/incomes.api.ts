@@ -1,5 +1,5 @@
-import api from "@/lib/axios";
-import type { CreateIncomeData } from "@/types/incomes.type";
+import api from "@/shared/lib/axios";
+import type { CreateIncomeData } from "@/dtos/incomes.dto";
 
 export const createIncome = async (incomeData: CreateIncomeData) => {
     try {

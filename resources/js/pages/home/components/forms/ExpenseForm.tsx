@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/shared/contexts/ToastContext';
 import { useCreateExpense, useCreateFixed, useCreateInstallment } from '../../hooks/useMutations';
-import type { CreateExpenseData, ExpenseFormData } from '@/types/expenses.type';
-import type { CreateFixedData } from '@/types/fixeds.type';
+import type { CreateExpenseData, ExpenseFormData } from '@/dtos/expenses.dto';
+import type { CreateFixedData } from '@/dtos/fixeds.dto';
 import type { CreateInstallmentData } from '@/types/installments.type';
 
 export default function ExpenseForm() {

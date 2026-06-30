@@ -1,6 +1,6 @@
-import api from "@/lib/axios";
+import api from "@/shared/lib/axios";
 
-import type { InstallmentItemResponse } from "@/types/installment-items.types";
+import type { InstallmentItemResponse } from "@/shared/types/dtos/installment-items.dto";
 
 export const getInstallmentItem = async (
     itemId: number

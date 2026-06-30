@@ -7,7 +7,7 @@ import InstallmentTable from './components/tables/InstallmentTable';
 import FixedTable from './components/tables/FixedTable';
 import TransactionDetails from './components/modals/TransactionDetails';
 import { TransactionProvider } from './contexts/TransactionContext';
-import ToastContainer from '@/components/ui/ToastContainer';
+import ToastContainer from '@/shared/components/ui/ToastContainer';
 
 function HomeContent() {
     const [tableView, setTableView] = useState<'debts' | 'movements' | 'installments' | 'fixeds'>('movements');

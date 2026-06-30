@@ -1,5 +1,5 @@
-import { useToast } from '@/contexts/ToastContext';
-import Toast from '@/components/ui/Toast';
+import { useToast } from '@/shared/contexts/ToastContext';
+import Toast from '@/shared/components/ui/Toast';
 
 export default function ToastContainer() {
     const { toasts, removeToast } = useToast();

@@ -1,5 +1,5 @@
-import api from "@/lib/axios";
-import type { CreateFixedData } from "@/types/fixeds.type";
+import api from "@/shared/lib/axios";
+import type { CreateFixedData } from "@/dtos/fixeds.dto";
 
 export const createFixed = async (data: CreateFixedData) => {
     try {

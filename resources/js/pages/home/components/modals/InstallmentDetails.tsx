@@ -1,23 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Modal } from '@/components/ui/Modal';
-import AlertDialog from '@/components/ui/AlertDialog';
-import Button from '@/components/ui/Button';
-import { getInstallment } from '@/api/installment.api';
-import { completeTransaction } from '@/api/transaction.api';
+import { Modal } from '@/shared/components/ui/Modal';
+import AlertDialog from '@/shared/components/ui/AlertDialog';
+import Button from '@/shared/components/ui/Button';
+import { getInstallment } from '@/shared/api/installment.api';
+import { completeTransaction } from '@/shared/api/transaction.api';
 import { useCalendarQuery } from '../../hooks/useCalendarQuery';
-import { useToast } from '@/contexts/ToastContext';
-import { formatDate as formatDateHelper } from '@/helpers/date-format';
-import type { InstallmentRecord } from '@/types/installments.type';
-import type { TransactionRecord } from '@/types/transactions.type';
+import { useToast } from '@/shared/contexts/ToastContext';
+import { formatDate as formatDateHelper } from '@/shared/helpers/date-format';
+import type { Installment } from '@/types/entities/Installment';
+import type { Transaction } from '@/types/entities/Transaction';
 
 interface InstallmentDetailsProps {
     isOpen: boolean;
-    installment: InstallmentRecord | null;
+    installment: Installment | null;
     onClose: () => void;
 }
 
 export default function InstallmentDetails({ isOpen, installment, onClose }: InstallmentDetailsProps) {
-    const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState<number | null>(null);
     const [applyDiscount, setApplyDiscount] = useState(false);

@@ -1,9 +1,9 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useInstallmentsQuery } from '../../hooks/useInstallmentsQuery';
 import { useTransaction } from '../../contexts/TransactionContext';
-import { formatDate } from '@/helpers/date-format';
-import type { InstallmentRecord } from '@/types/installments.type';
-import type { InstallmentItem } from '@/types/installment-items.types';
+import { formatDate } from '@/shared/helpers/date-format';
+import type { Installment } from '@/types/entities/Installment';
+import type { InstallmentItem } from '@/shared/types/dtos/installment-items.dto';
 
 export default function InstallmentTable() {
     const { installments, refetchInstallments } = useInstallmentsQuery();
@@ -18,7 +18,7 @@ export default function InstallmentTable() {
         setExpandedInstallmentId(expandedInstallmentId === installmentId ? null : installmentId);
     };
 
-    const handleItemClick = (item: InstallmentItem, installment: InstallmentRecord) => {
+    const handleItemClick = (item: InstallmentItem, installment: Installment) => {
         const transactionPlaceholder = {
             id: null,
             type: 'installment' as const,

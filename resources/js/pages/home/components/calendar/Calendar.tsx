@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import CalendarGrid from './CalendarGrid';
 import { useCalendarQuery } from '../../hooks/useCalendarQuery';
 import { useTransaction } from '../../contexts/TransactionContext';
-import type { TransactionRecord } from '@/types/transactions.type';
+import type { Transaction } from '@/types/entities/Transaction';
 
 interface DayEvent {
     id: string;
@@ -13,7 +13,7 @@ interface DayEvent {
     date: string;
     isPaid?: boolean;
     fixedId?: number;
-    transactionData?: TransactionRecord;
+    transactionData?: Transaction;
 }
 
 export default function Calendar() {

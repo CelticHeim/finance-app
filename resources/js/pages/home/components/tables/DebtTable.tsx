@@ -1,4 +1,4 @@
-import { formatDate, isPast } from '@/helpers/date-format';
+import { formatDate, isPast } from '@/shared/helpers/date-format';
 
 interface Debt {
     id: string;

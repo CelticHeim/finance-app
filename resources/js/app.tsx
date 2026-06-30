@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 //Providers
-import { ToastProvider } from './contexts/ToastContext';
+import { ToastProvider } from './shared/contexts/ToastContext';
 
 // Pages
 import Home from './pages/home';

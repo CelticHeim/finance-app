@@ -1,5 +1,5 @@
 import CalendarDay from './CalendarDay';
-import type { TransactionRecord } from '@/types/transactions.type';
+import type { Transaction } from '@/types/entities/Transaction';
 
 interface DayEvent {
     id: string;
@@ -10,14 +10,14 @@ interface DayEvent {
     date: string;
     isPaid?: boolean;
     fixedId?: number;
-    transactionData?: TransactionRecord;
+    transactionData?: Transaction;
 }
 
 interface CalendarGridProps {
     month: number;
     year: number;
     events: Map<string, DayEvent[]>;
-    onEventClick?: (transaction: TransactionRecord) => void;
+    onEventClick?: (transaction: Transaction) => void;
 }
 
 export default function CalendarGrid({ month, year, events, onEventClick }: CalendarGridProps) {

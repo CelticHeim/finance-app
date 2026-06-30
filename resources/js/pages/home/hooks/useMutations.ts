@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createIncome } from '@/api/incomes.api';
-import { createExpense } from '@/api/expenses.api';
-import { createFixed } from '@/api/fixed.api';
-import { createInstallment } from '@/api/installment.api';
-import type { CreateIncomeData } from '@/types/incomes.type';
-import type { CreateExpenseData } from '@/types/expenses.type';
-import type { CreateFixedData } from '@/types/fixeds.type';
+import { createIncome } from '@/shared/api/incomes.api';
+import { createExpense } from '@/shared/api/expenses.api';
+import { createFixed } from '@/shared/api/fixed.api';
+import { createInstallment } from '@/shared/api/installment.api';
+import type { CreateIncomeData } from '@/dtos/incomes.dto';
+import type { CreateExpenseData } from '@/dtos/expenses.dto';
+import type { CreateFixedData } from '@/dtos/fixeds.dto';
 import type { CreateInstallmentData } from '@/types/installments.type';
 
 export function useCreateIncome() {

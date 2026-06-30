@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useFixedsQuery } from '../../hooks/useFixedsQuery';
-import { formatDate } from '@/helpers/date-format';
+import { formatDate } from '@/shared/helpers/date-format';
 
 export default function FixedTable() {
     const { fixeds, refetchFixeds } = useFixedsQuery();
